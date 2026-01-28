@@ -14,7 +14,25 @@
  <img class="avatar-img" id="profileAvatar" src="avatar.jpg" alt="Avatar của Sỹ Kòi" /> 
             <h1 class="fw-bold">Sỹ Kòi</h1>
             <p class="lead mb-3">Sinh viên Y khoa | Đam mê Công nghệ</p>
-            <div class="d-flex justify-content-center gap-2"> <a href="https://www.facebook.com/share/14RDNUiZKQA/" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-brands fa-facebook text-primary"></i> Facebook </a> <a href="https://zalo.me/84383339193" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-solid fa-comment-dots text-primary"></i> Zalo </a> <a href="mailto:hiept6736@gmail.com" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-solid fa-envelope text-primary"></i> Email </a> </div>
+            <div class="d-flex justify-content-center gap-2"> <a href="https://www.facebook.com/share/14RDNUiZKQA/" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-brands fa-facebook text-primary"></i> Facebook </a><button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#zaloModal">
+    <i class="fa-solid fa-qrcode text-primary"></i> Zalo QR
+</button>
+
+<div class="modal fade" id="zaloModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Quét mã kết bạn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="zalo-qr.png" alt="Zalo QR" class="img-fluid" style="max-width: 200px;">
+        <p class="mt-2 small text-muted">Mở Zalo và quét mã để kết nối</p>
+      </div>
+    </div>
+  </div>
+</div>
+<a href="mailto:hiept6736@gmail.com" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-solid fa-envelope text-primary"></i> Email </a> </div>
          </div>
       </header>
       <div class="container mb-5">
