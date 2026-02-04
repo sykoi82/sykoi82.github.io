@@ -1,114 +1,232 @@
-<!DOCTYPE html> 
-<html lang="vi"><head>
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Web của Sỹ</title>
-    
+
     <meta property="og:title" content="Web cá nhân của Sỹ">
     <meta property="og:description" content="Người nghèo kể chuyện.">
-    <meta property="og:image" content="https://raw.githubusercontent.com/sykoi82/sykoi82.github.io/refs/heads/main/Thumbnail.png">
+    <meta property="og:image" content="https://sykoi82.github.io/media/Thumbnail.png">
     <meta property="og:url" content="https://sykoi82.github.io">
     <meta property="og:type" content="website">
-    
+
     <link rel="icon" type="image/png" href="media/Logo.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    
-    <style> 
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; } 
-        .profile-header { background: linear-gradient(135deg, #ff0000, #001dfd); color: white; padding: 3rem 0; margin-bottom: 2rem; border-radius: 0 0 1rem 1rem; } 
-        /* Avatar image */ 
-        .avatar-img { width: 120px; height: 120px; display: block; margin: 0 auto 15px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.3); background-color: #ffffff; } 
-        @media (max-width: 576px) { .avatar-img { width: 96px; height: 96px; } } 
-        .card { border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s; } 
-        .card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); } 
-        .tag-tech { background-color: #e2e3e5; color: #333; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; } 
-        .tag-med { background-color: #d1e7dd; color: #0f5132; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; } 
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #ff0000, #001dfd);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 1rem 1rem;
+        }
+
+        /* Avatar image */
+        .avatar-img {
+            width: 120px;
+            height: 120px;
+            display: block;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            background-color: #ffffff;
+        }
+
+        @media (max-width: 576px) {
+            .avatar-img {
+                width: 96px;
+                height: 96px;
+            }
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tag-tech {
+            background-color: #e2e3e5;
+            color: #333;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .tag-med {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
-   <body>
-      <header class="profile-header text-center">
-         <div class="container">
- <img class="avatar-img" id="profileAvatar" src="./media/avatar.jpg" alt="Avatar của Sỹ Kòi" /> 
+<body>
+
+        <header class="profile-header text-center">
+        <div class="container">
+            <img class="avatar-img" id="profileAvatar" src="./media/avatar.jpg" alt="Avatar của Sỹ Kòi" />
             <h1 class="fw-bold">Sỹ Kòi</h1>
             <p class="lead mb-3">Sinh viên Y khoa | Đam mê Công nghệ</p>
-            <div class="d-flex justify-content-center gap-2"> <a href="https://www.facebook.com/share/14RDNUiZKQA/" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-brands fa-facebook text-primary"></i> Facebook </a><button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#zaloModal">
-    <i class="fa-solid fa-qrcode text-primary"></i> Zalo QR
-</button>
-
-<div class="modal fade" id="zaloModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Quét mã kết bạn</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img src="./media/zalo-qr.png" alt="Zalo QR" class="img-fluid" style="max-width: 200px;">
-        <p class="mt-2 small text-muted">Mở Zalo và quét mã để kết nối</p>
-      </div>
-    </div>
-  </div>
-</div>
-<a href="mailto:hiept6736@gmail.com" class="btn btn-light btn-sm rounded-pill px-3"> <i class="fa-solid fa-envelope text-primary"></i> Email </a> </div>
-         </div>
-      </header>
-      <div class="container mb-5">
-         <div class="row">
-            <div class="col-md-4 mb-4">
-               <div class="card h-100">
-                  <div class="card-body">
-                     <h5 class="card-title fw-bold"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Giới thiệu</h5>
-                     <p class="card-text text-secondary"> Tôi là một sinh viên Y của Học Viện Quân Y với niềm đam mê tìm hiểu về cơ thể người và thế giới số. Blog này là nơi tôi lưu trữ kiến thức và chia sẻ kinh nghiệm. </p>
-                     <hr>
-                     <h6 class="fw-bold">Sở thích</h6>
-                     <ul class="list-unstyled">
-                        <li><i class="fa-solid fa-check text-success me-2"></i>Đam mê chụp ảnh</li>
-                        <li><i class="fa-solid fa-check text-success me-2"></i>Du lịch</li>
-                        <li><i class="fa-solid fa-check text-success me-2"></i>Khám phá khoa học - kĩ thuật</li>
-                     </ul>
-                  </div>
-               </div>
-            </div>
-            <div class="col-md-8">
-               <h3 class="mb-4 fw-bold border-start border-4 border-primary ps-3">Bài viết mới nhất</h3>
-
-<div class="card mb-3">
-   <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-2"> 
-         <span class="tag-tech">Dành Cho Cu Sun</span> 
-         <small class="text-muted">31/01/2026</small> 
-      </div>
-      <h5 class="card-title">
-         <a href="./post/cmsn.html" class="text-decoration-none text-dark" target="_blank">
-            Lời chân thành từ sykoi
-         </a>
-      </h5>
-      <p class="card-text text-secondary">
-         không trải qua quá nhiều trải nghiệm với m nhưng cũng là một phần không thể thiếu trong kí ức của t...
-      </p>
-   </div>
-</div>
+            
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="https://www.facebook.com/share/14RDNUiZKQA/" class="btn btn-light btn-sm rounded-pill px-3" target="_blank">
+                    <i class="fa-brands fa-facebook text-primary"></i> Facebook
+                </a>
                 
-               <div class="card mb-3">
-                  <div class="card-body">
-                     <div class="d-flex justify-content-between align-items-center mb-2"> <span class="tag-med">Ngẫu Hứng</span> <small class="text-muted">02/11/2025</small> </div>
-                     <h5 class="card-title"><a href="https://www.facebook.com/share/p/1DDsK46U3A/" class="text-decoration-none text-dark">Chào tháng 11, khép lại những dang dở và hối hả của tháng 10.</a></h5>
-                     <p class="card-text text-secondary"> Sáng nay thức dậy, tôi bỗng thấy hương hoa sữa ngào ngạt len lỏi vào phòng. Lá vàng bay bay, rồi lặng lẽ rụng...</p>
-                  </div>
-               </div>
-               <div class="card mb-3">
-                  <div class="card-body">
-                     <div class="d-flex justify-content-between align-items-center mb-2"> <span class="tag-tech">Tình Nguyện</span> <small class="text-muted">01/08/2025</small> </div>
-                     <h5 class="card-title"><a href="./post/hienmau.html" class="text-decoration-none text-dark">Hiến máu tại Học Viện quân Y</a></h5>
-                     <p class="card-text text-secondary">Ngày mai, Học Viện Quân Y tổ chức một buổi hiến máu tình nguyện - Đây là một hoạt động thường niên mà nhà trường tổ chức mang đậm tính nhân đạo, thể hiện rõ chủ trương “vì nhân dân phục vụ”...</p>
-                  </div>
-               </div>
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#zaloModal">
+                    <i class="fa-solid fa-qrcode text-primary"></i> Zalo QR
+                </button>
+
+                <a href="mailto:hiept6736@gmail.com" class="btn btn-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-envelope text-primary"></i> Email
+                </a>
+
+                <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#donateModal">
+                    <i class="fa-solid fa-mug-hot"></i> Mời Cafe
+                </button>
             </div>
-         </div>
-      </div>
-      <footer class="text-center py-4 text-muted border-top"> <small>&copy; 2026 Sỹ Kòi. Built with Bootstrap 5.</small> </footer>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> <!-- Tùy chọn: nếu muốn thay ảnh bằng JavaScript (ví dụ từ biến hoặc input) --> <script> // Ví dụ: thay link ảnh bằng JS (bỏ comment và sửa URL nếu cần) // const avatarUrl = 'https://example.com/path/to/your-image.jpg'; // document.getElementById('profileAvatar').src = avatarUrl; </script> 
-   </body>
+        </div>
+    </header>
+
+
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Giới thiệu</h5>
+                        <p class="card-text text-secondary">
+                            Tôi là một sinh viên Y của Học Viện Quân Y với niềm đam mê tìm hiểu về cơ thể người và thế giới số. Blog này là nơi tôi lưu trữ kiến thức và chia sẻ kinh nghiệm.
+                        </p>
+                        <hr>
+                        <h6 class="fw-bold">Sở thích</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Đam mê chụp ảnh</li>
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Du lịch</li>
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Khám phá khoa học - kĩ thuật</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <h3 class="mb-4 fw-bold border-start border-4 border-primary ps-3">Bài viết mới nhất</h3>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tag-tech">Dành Cho Cu Sun</span>
+                            <small class="text-muted">31/01/2026</small>
+                        </div>
+                        <h5 class="card-title">
+                            <a href="./post/cmsn.html" class="text-decoration-none text-dark" target="_blank">
+                                Lời chân thành từ sykoi
+                            </a>
+                        </h5>
+                        <p class="card-text text-secondary">
+                            không trải qua quá nhiều trải nghiệm với m nhưng cũng là một phần không thể thiếu trong kí ức của t...
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tag-med">Ngẫu Hứng</span>
+                            <small class="text-muted">02/11/2025</small>
+                        </div>
+                        <h5 class="card-title">
+                            <a href="https://www.facebook.com/share/p/1DDsK46U3A/" class="text-decoration-none text-dark" target="_blank">
+                                Chào tháng 11, khép lại những dang dở và hối hả của tháng 10.
+                            </a>
+                        </h5>
+                        <p class="card-text text-secondary">
+                            Sáng nay thức dậy, tôi bỗng thấy hương hoa sữa ngào ngạt len lỏi vào phòng. Lá vàng bay bay, rồi lặng lẽ rụng...
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tag-tech">Tình Nguyện</span>
+                            <small class="text-muted">01/08/2025</small>
+                        </div>
+                        <h5 class="card-title">
+                            <a href="./post/hienmau.html" class="text-decoration-none text-dark">
+                                Hiến máu tại Học Viện Quân Y
+                            </a>
+                        </h5>
+                        <p class="card-text text-secondary">
+                            Ngày mai, Học Viện Quân Y tổ chức một buổi hiến máu tình nguyện - Đây là một hoạt động thường niên mà nhà trường tổ chức mang đậm tính nhân đạo...
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 text-muted border-top">
+        <small>&copy; 2026 Sỹ Kòi. Built with Bootstrap 5.</small>
+    </footer>
+
+    <div class="modal fade" id="zaloModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Quét mã kết bạn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="./media/zalo-qr.png" alt="Zalo QR" class="img-fluid" style="max-width: 200px;">
+                    <p class="mt-2 small text-muted">Mở Zalo và quét mã để kết nối</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="donateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Ủng hộ sỹ <i class="fa-solid fa-heart text-danger"></i></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="https://img.vietqr.io/image/MB-248808022006-compact.jpg?addInfo=Moi%20Sy%20Uong%20Cafe" 
+                         alt="QR Chuyển khoản" class="img-fluid rounded mb-2">
+                    
+                    <p class="small text-muted mb-1">Quét mã để chuyển khoản nhanh</p>
+                    <div class="bg-light p-2 rounded">
+                        <p class="mb-0 fw-bold text-dark">MB Bank</p>
+                        <p class="mb-0 text-primary fw-bold">248808022006</p> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
 </html>
