@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc mừng sinh nhật!</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            /* Nền gradient tông màu ấm áp */
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 15px;
+            margin: 0;
+        }
+        .birthday-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            padding: 3rem 2rem;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            color: #ff4757;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .message-box {
+            font-size: 1.15rem;
+            color: #444;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+        .gallery-img {
+            border-radius: 12px;
+            object-fit: cover;
+            width: 100%;
+            height: 250px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        /* Hiệu ứng phóng to nhẹ khi di chuột vào ảnh */
+        .gallery-img:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="birthday-card">
+        <h1>Happy Birthday! 🎂</h1>
+        
+        <div class="message-box">
+            [Thay đoạn text này bằng lời chúc của bạn. Bạn có thể viết dài tùy thích, tự do thể hiện tình cảm của mình. Giao diện sẽ tự động căn chỉnh khoảng cách cho phù hợp.]
+        </div>
+
+        <div class="row g-4">
+            <div class="col-6">
+                <img src="https://via.placeholder.com/400x300?text=Anh+1" alt="Ảnh 1" class="gallery-img">
+            </div>
+            <div class="col-6">
+                <img src="https://via.placeholder.com/400x300?text=Anh+2" alt="Ảnh 2" class="gallery-img">
+            </div>
+            <div class="col-6">
+                <img src="https://via.placeholder.com/400x300?text=Anh+3" alt="Ảnh 3" class="gallery-img">
+            </div>
+            <div class="col-6">
+                <img src="https://via.placeholder.com/400x300?text=Anh+4" alt="Ảnh 4" class="gallery-img">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
