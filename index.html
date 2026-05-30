@@ -1,846 +1,251 @@
 <!DOCTYPE html>
-<html lang="vi" class="dark">
+<html lang="vi">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>một chút tinh nghịch...</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web của Sỹ</title>
 
-<!-- ① Preconnect: kết nối song song trước khi tải -->
-<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
-<link rel="dns-prefetch" href="https://api.imgbb.com"/>
+    <meta property="og:title" content="Web cá nhân của Sỹ">
+    <meta property="og:description" content="Người nghèo kể chuyện.">
+    <meta property="og:image" content="https://sykoi82.github.io/media/Thumbnail.png">
+    <meta property="og:url" content="https://sykoi82.github.io">
+    <meta property="og:type" content="website">
 
-<!-- ② Font: chỉ lấy đúng weight cần dùng + display=swap (không block render) -->
-<link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,400&family=DM+Sans:wght@400;500&display=swap"
-  media="print" onload="this.media='all'"/>
-<noscript>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,400&family=DM+Sans:wght@400;500&display=swap"/>
-</noscript>
+    <link rel="icon" type="image/png" href="media/Logo.png">
 
-<!-- ③ Dark mode trước render để không bị flash trắng -->
-<script>
-(function(){
-  var s=localStorage.getItem("theme");
-  if(s==="light") document.documentElement.classList.remove("dark");
-  else document.documentElement.classList.add("dark");
-})();
-</script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<style>
-/* ── THEME VARIABLES ───────────────────────────────────────── */
-:root{
-  --bg:#faf9f7; --bg2:#f0ede8; --bg3:#fff;
-  --fg:#1a1816; --fg2:#4a4643; --fg3:#9b9490;
-  --bdr:#e2ddd7; --acc:#b5451b; --acc2:#e8d5c4;
-  --ph:#9b9490; --hdr:rgba(250,249,247,.93); --shd:rgba(0,0,0,.06);
-}
-html.dark{
-  --bg:#111010; --bg2:#1c1b1a; --bg3:#1e1d1c;
-  --fg:#e8e4e0; --fg2:#a8a4a0; --fg3:#5a5856;
-  --bdr:#2e2c2a; --acc:#d4622a; --acc2:#3d2215;
-  --ph:#6b6764; --hdr:rgba(17,16,16,.93); --shd:rgba(0,0,0,.3);
-}
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-/* ── RESET ─────────────────────────────────────────────────── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;line-height:1.5}
-textarea,input{font-family:inherit;background:transparent;border:none;outline:none;color:var(--fg)}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-::placeholder{color:var(--ph)!important;opacity:1!important}
+        .profile-header {
+            background: linear-gradient(135deg, #ff0000, #001dfd);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 1rem 1rem;
+        }
 
-/* ── LAYOUT ────────────────────────────────────────────────── */
-.page{max-width:1152px;margin:0 auto;padding:0 32px}
-.page-grid{display:grid;grid-template-columns:260px 1fr;gap:56px}
-.main-col{min-height:100vh;padding:40px 0}
-.write-col{max-width:720px;margin:0 auto;padding:32px 0 96px}
-@media(max-width:1023px){
-  .page{padding:0}
-  .page-grid{display:block}
-  .main-col{padding:20px 16px 40px}
-  .desk{display:none!important}
-}
-@media(min-width:1024px){.mob{display:none!important}}
+        /* Avatar image */
+        .avatar-img {
+            width: 120px;
+            height: 120px;
+            display: block;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            background-color: #ffffff;
+        }
 
-/* ── HEADER ────────────────────────────────────────────────── */
-.hdr{position:sticky;top:0;z-index:50;background:var(--hdr);backdrop-filter:blur(10px);border-bottom:1px solid var(--bdr)}
-.hdr-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px}
-.site-name{font-family:'Lora',Georgia,serif;font-size:1.2rem;font-weight:600;color:var(--fg)}
-.site-name em{color:var(--acc);font-style:normal}
-.hdr-actions{display:flex;align-items:center;gap:8px}
-.mob-search{padding:0 16px 11px;position:relative}
+        @media (max-width: 576px) {
+            .avatar-img {
+                width: 96px;
+                height: 96px;
+            }
+        }
 
-/* ── BUTTONS ───────────────────────────────────────────────── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:.82rem;font-weight:500;border-radius:7px;padding:6px 14px;transition:all .15s;cursor:pointer;line-height:1}
-.btn-p{background:var(--acc);color:#fff;border:1px solid transparent}
-.btn-p:hover{opacity:.87}
-.btn-p:disabled{opacity:.45;cursor:not-allowed}
-.btn-g{background:none;color:var(--fg2);border:1px solid var(--bdr)}
-.btn-g:hover{background:var(--bg2)}
-.btn-danger{background:none;color:#ef4444;border:1px solid rgba(239,68,68,.4)}
-.btn-danger:hover{background:rgba(239,68,68,.07)}
-.btn-sm{padding:4px 10px;font-size:.76rem}
-.btn-full{width:100%;justify-content:center;padding:10px 14px}
-.theme-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);color:var(--fg3);transition:all .15s;flex-shrink:0}
-.theme-btn:hover{background:var(--bg2);color:var(--fg)}
+        .card {
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
 
-/* ── SIDEBAR ───────────────────────────────────────────────── */
-.sidebar{padding:40px 0}
-.sidebar-sticky{position:sticky;top:40px;display:flex;flex-direction:column;gap:24px}
-.sidebar-divider{border:none;border-top:1px solid var(--bdr)}
-.avatar-wrap{text-align:center}
-.avatar{width:88px;height:88px;border-radius:50%;margin:0 auto;background:linear-gradient(135deg,var(--acc),#7a2e0e);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px var(--shd)}
-.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
-.avatar-txt{color:#fff;font-family:'Lora',serif;font-size:1.6rem;font-weight:600}
-.profile-name{margin-top:14px;font-family:'Lora',serif;font-size:1.1rem;font-weight:600;color:var(--fg)}
-.profile-bio{margin-top:7px;font-size:.83rem;color:var(--fg3);line-height:1.55}
-.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}
-.stat-box{background:var(--bg2);border-radius:10px;padding:12px 8px}
-.stat-n{font-size:1.3rem;font-weight:600;color:var(--fg)}
-.stat-l{font-size:.7rem;color:var(--fg3);margin-top:2px}
-.sb-label{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
-.tag-cloud{display:flex;flex-wrap:wrap;gap:6px}
-.sb-links{display:flex;flex-direction:column;gap:8px}
-.sb-link{display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--fg2);transition:color .15s}
-.sb-link:hover{color:var(--acc)}
-.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--acc2);flex-shrink:0}
-.sb-actions{display:flex;flex-direction:column;gap:8px}
-.user-email{font-size:.71rem;color:var(--fg3);text-align:center}
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
 
-/* ── SEARCH ────────────────────────────────────────────────── */
-.search-wrap{position:relative}
-.search-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--fg3);pointer-events:none}
-.search-inp{width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:99px;padding:7px 12px 7px 32px;font-size:.84rem;color:var(--fg);transition:border-color .2s;outline:none}
-.search-inp:focus{border-color:var(--acc)}
+        .tag-tech {
+            background-color: #e2e3e5;
+            color: #333;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
 
-/* ── TAG PILLS ─────────────────────────────────────────────── */
-.tag{display:inline-block;background:var(--acc2);color:var(--acc);font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:500}
-.tag-btn{display:inline-block;background:none;border:1px solid var(--bdr);color:var(--fg2);font-size:.7rem;padding:3px 9px;border-radius:20px;transition:all .15s;cursor:pointer}
-.tag-btn:hover{background:var(--acc2);color:var(--acc);border-color:var(--acc2)}
+        .tag-med {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
 
-/* ── POST LIST ─────────────────────────────────────────────── */
-.post-list{border-top:1px solid var(--bdr)}
-.post-card{padding:26px 0;border-bottom:1px solid var(--bdr);cursor:pointer;transition:transform .12s}
-.post-card:hover{transform:translateX(5px)}
-.post-card:hover .pc-title{color:var(--acc)}
-.pc-row{display:flex;align-items:flex-start;gap:14px}
-.pc-body{flex:1 1 0%;min-width:0}
-.pc-date{font-size:.73rem;color:var(--fg3);letter-spacing:.03em;margin-bottom:7px}
-.pc-title{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;line-height:1.35;color:var(--fg);margin-bottom:7px;transition:color .12s}
-.pc-excerpt{font-size:.87rem;color:var(--fg2);line-height:1.6;font-weight:400;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
-.pc-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;flex-shrink:0}
-.post-count{text-align:center;padding:36px 0 0;font-size:.72rem;color:var(--fg3)}
-.search-lbl{font-size:.84rem;color:var(--fg3);margin-bottom:20px}
+<body>
 
-/* ── SKELETON ──────────────────────────────────────────────── */
-.skel{background:var(--bg2);border-radius:4px;animation:pulse 1.4s ease-in-out infinite}
-.skel-list{border-top:1px solid var(--bdr)}
-.skel-item{padding:26px 0;border-bottom:1px solid var(--bdr)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+        <header class="profile-header text-center">
+        <div class="container">
+            <img class="avatar-img" id="profileAvatar" src="./media/avatar.jpg" alt="Avatar của Sỹ Kòi" />
+            <h1 class="fw-bold">Sỹ Kòi</h1>
+            <p class="lead mb-3">Sống lông bông | không care sự đời</p>
+            
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="https://www.facebook.com/share/14RDNUiZKQA/" class="btn btn-light btn-sm rounded-pill px-3" target="_blank">
+                    <i class="fa-brands fa-facebook text-primary"></i> Facebook
+                </a>
+                
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#zaloModal">
+                    <i class="fa-solid fa-qrcode text-primary"></i> Zalo QR
+                </button>
 
-/* ── EMPTY STATE ───────────────────────────────────────────── */
-.empty{padding:80px 0;text-align:center;color:var(--fg3)}
-.empty-ico{font-size:2.4rem;margin-bottom:12px}
+                <a href="mailto:hiept6736@gmail.com" class="btn btn-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-envelope text-primary"></i> Email
+                </a>
 
-/* ── POST VIEW ─────────────────────────────────────────────── */
-.post-view{padding:40px 0 80px}
-.back-btn{display:inline-flex;align-items:center;gap:5px;font-size:.83rem;color:var(--fg3);margin-bottom:24px;transition:color .15s;cursor:pointer;padding:0;border:none;background:none}
-.back-btn:hover{color:var(--acc)}
-.pv-date{font-size:.73rem;color:var(--fg3);letter-spacing:.03em;margin-bottom:12px}
-.pv-title{font-family:'Lora',serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:600;line-height:1.25;color:var(--fg);margin-bottom:16px;letter-spacing:-.02em}
-.pv-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
-.pv-rule{width:40px;height:2px;background:var(--acc);border:none;margin-bottom:32px}
-.pv-body{font-family:'Lora',serif;font-size:1.05rem;line-height:1.88;color:var(--fg2);word-break:break-word}
-.pv-body span{white-space:pre-wrap}
-.post-img{max-width:100%;border-radius:8px;margin:16px 0}
-.pv-actions{display:flex;gap:8px;margin-top:48px;padding-top:22px;border-top:1px solid var(--bdr)}
-
-/* ── WRITE VIEW ────────────────────────────────────────────── */
-.wr-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
-.wr-label{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em}
-.wr-save{font-size:.74rem;color:var(--fg3)}
-.wr-title{width:100%;font-family:'Lora',serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:600;color:var(--fg);letter-spacing:-.02em;line-height:1.3;resize:none;overflow:hidden;display:block;border-bottom:2px solid var(--bdr);padding-bottom:14px;margin-bottom:14px;transition:border-color .2s}
-.wr-title:focus{border-color:var(--acc)}
-.wr-tags{width:100%;font-size:.84rem;color:var(--fg2);border-bottom:1px solid var(--bdr);padding:7px 0 11px;margin-bottom:20px;display:block;transition:border-color .2s}
-.wr-tags:focus{border-color:var(--acc)}
-.wr-content{width:100%;min-height:400px;font-family:'Lora',serif;font-size:1.05rem;line-height:1.88;color:var(--fg2);resize:none;display:block}
-.write-footer{position:fixed;bottom:0;left:0;right:0;background:var(--hdr);backdrop-filter:blur(10px);border-top:1px solid var(--bdr);padding:11px 16px;display:flex;justify-content:flex-end;gap:8px;z-index:50}
-
-/* ── IMAGE TOOLBAR ─────────────────────────────────────────── */
-.img-toolbar{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:20px}
-.img-tb-hdr{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr)}
-.img-tb-body{padding:8px 12px}
-.img-tb-lbl{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em}
-.img-file-label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
-.img-preview-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.img-preview-item{position:relative;width:76px;height:76px;border-radius:6px;overflow:hidden}
-.img-preview-item img{width:100%;height:100%;object-fit:cover}
-.rm-img{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
-.progress-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:var(--acc);transition:width .3s;border-radius:2px}
-
-/* ── LOGIN ─────────────────────────────────────────────────── */
-.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg)}
-.login-card{width:100%;max-width:340px}
-.login-avatar-wrap{text-align:center;margin-bottom:28px}
-.login-av{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--acc),#7a2e0e);display:flex;align-items:center;justify-content:center}
-.login-av span{color:#fff;font-family:'Lora',serif;font-size:1.25rem;font-weight:600}
-.login-h{font-family:'Lora',serif;font-size:1.4rem;font-weight:600;color:var(--fg)}
-.login-sub{font-size:.83rem;color:var(--fg3);margin-top:4px}
-.login-box{background:var(--bg3);border:1px solid var(--bdr);border-radius:16px;padding:26px 22px;box-shadow:0 4px 24px var(--shd)}
-.login-err{font-size:.82rem;color:#ef4444;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:9px 12px;margin-bottom:14px}
-.form-group{margin-bottom:14px}
-.form-label{display:block;font-size:.74rem;font-weight:500;color:var(--fg2);margin-bottom:5px}
-.form-input{width:100%;border:1px solid var(--bdr);border-radius:8px;padding:9px 13px;font-size:.9rem;background:var(--bg);color:var(--fg);transition:border-color .2s;outline:none}
-.form-input:focus{border-color:var(--acc)}
-</style>
-
-<script type="module">
-import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc,
-         updateDoc, deleteDoc, orderBy, query,
-         serverTimestamp, onSnapshot }
-                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword,
-         signOut, onAuthStateChanged }
-                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-// ════════════════════════════════════════════════
-// 🔧 CẤU HÌNH — chỉnh sửa tại đây
-// ════════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey:            "AIzaSyBiWZSz674nfh3cu12dDPv47YVHI5o5fjg",
-  authDomain:        "st82-f333b.firebaseapp.com",
-  projectId:         "st82-f333b",
-  storageBucket:     "st82-f333b.firebasestorage.app",
-  messagingSenderId: "136813956513",
-  appId:             "1:136813956513:web:fd5ea81e019274f0d08fe0"
-};
-
-const IMGBB_API_KEY = "0f011b149aaca94b0280a6fb49e6f501"; // ← API key ImgBB
-
-const PROFILE = {
-  name:     "SỸ TRẦN",
-  tagline:  "Ghi lại chút cảm xúc đời thường.",
-  avatar:   "./media/avatar.jpg",       // URL ảnh — để trống = dùng chữ viết tắt
-  initials: "ST",
-  links:    [
-    // { label:"Facebook", url:"https://www.facebook.com/share/1ENwRoym9w/ },
-    // { label:"Email",    url:"mailto:hiept6736@gmail.com"    },
-  ]
-};
-// ════════════════════════════════════════════════
-
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
-const col  = collection(db, "posts");
-
-// ── STATE ────────────────────────────────────────
-let posts       = [];
-let postsLoaded = false;
-let currentUser = null;
-let view        = "home";
-let activeId    = null;
-let editId      = null;
-let draft       = { title:"", content:"", tags:"", images:[] };
-let autoTimer   = null;
-let searchQuery = "";
-
-// ── DARK MODE ────────────────────────────────────
-const isDark  = () => document.documentElement.classList.contains("dark");
-function toggleTheme() {
-  const d = !isDark();
-  document.documentElement.classList.toggle("dark", d);
-  localStorage.setItem("theme", d ? "dark" : "light");
-  render();
-}
-
-// ── AUTH ─────────────────────────────────────────
-onAuthStateChanged(auth, user => { currentUser = user; render(); });
-
-// ── FIRESTORE — realtime ─────────────────────────
-onSnapshot(query(col, orderBy("createdAt","desc")), snap => {
-  posts = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-  postsLoaded = true;
-  render();
-}, err => {
-  postsLoaded = true;
-  if (err.code === "permission-denied")
-    alert("Firestore Rules chưa cấu hình. Vui lòng kiểm tra lại.");
-  render();
-});
-
-// ── CRUD ─────────────────────────────────────────
-async function savePost() {
-  const ts   = serverTimestamp();
-  const data = { title:draft.title, content:draft.content,
-                 tags:draft.tags, images:draft.images||[], updatedAt:ts };
-  if (editId) await updateDoc(doc(db,"posts",editId), data);
-  else        await addDoc(col, { ...data, createdAt:ts });
-  localStorage.removeItem("blog_draft");
-  draft  = { title:"", content:"", tags:"", images:[] };
-  editId = null;
-  setView("home");
-}
-
-async function deletePost(id) {
-  await deleteDoc(doc(db,"posts",id));
-  if (view==="post") setView("home"); else render();
-}
-
-// ── IMAGE UPLOAD (ImgBB) ─────────────────────────
-function uploadImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const bar  = document.getElementById("prog-fill");
-        const wrap = document.getElementById("prog-bar");
-        if (wrap) wrap.style.display = "block";
-        if (bar)  bar.style.width    = "40%";
-
-        const fd = new FormData();
-        fd.append("key",   IMGBB_API_KEY);
-        fd.append("image", reader.result.split(",")[1]);
-
-        const res  = await fetch("https://api.imgbb.com/1/upload", { method:"POST", body:fd });
-        const data = await res.json();
-
-        if (bar) bar.style.width = "100%";
-        setTimeout(() => {
-          if (wrap) wrap.style.display = "none";
-          if (bar)  bar.style.width    = "0%";
-        }, 400);
-
-        if (data.success) resolve(data.data.url);
-        else reject(new Error(data.error?.message || "Upload thất bại"));
-      } catch(e) { reject(e); }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function handleImages(files) {
-  const st = document.getElementById("upload-status");
-  if (st) st.textContent = "Đang tải ảnh…";
-  try {
-    for (const f of files) {
-      if (!f.type.startsWith("image/")) continue;
-      const url = await uploadImage(f);
-      draft.images = [...(draft.images||[]), url];
-      const ta  = document.getElementById("inp-content");
-      if (ta) {
-        const mk  = `\n@@IMG:${url}@@\n`;
-        const pos = ta.selectionStart ?? ta.value.length;
-        ta.value  = ta.value.slice(0,pos) + mk + ta.value.slice(pos);
-        draft.content = ta.value;
-      }
-      renderPreviews();
-    }
-    if (st) { st.textContent = "✓ Đã chèn ảnh"; setTimeout(()=>{ if(st) st.textContent=""; },2000); }
-  } catch(e) { if (st) st.textContent = "Lỗi: " + e.message; }
-}
-
-function renderPreviews() {
-  const g = document.getElementById("img-preview-grid");
-  if (!g) return;
-  g.innerHTML = (draft.images||[]).map((u,i) => `
-    <div class="img-preview-item">
-      <img src="${esc(u)}" alt="img"/>
-      <button class="rm-img" data-i="${i}">✕</button>
-    </div>`).join("");
-  g.querySelectorAll(".rm-img").forEach(el => el.addEventListener("click", ev => {
-    ev.stopPropagation();
-    const i   = +el.dataset.i;
-    const url = draft.images[i];
-    draft.images.splice(i,1);
-    const ta = document.getElementById("inp-content");
-    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,""); draft.content = ta.value; }
-    renderPreviews();
-  }));
-}
-
-// ── CONTENT RENDERER ─────────────────────────────
-function renderContent(text) {
-  return (text||"").split(/(@@IMG:[^@]+@@)/g).map(p => {
-    const m = p.match(/^@@IMG:(.+)@@$/);
-    return m ? `<img src="${esc(m[1])}" class="post-img" loading="lazy" alt="ảnh"/>`
-             : `<span>${esc(p)}</span>`;
-  }).join("");
-}
-
-// ── AUTH ACTIONS ─────────────────────────────────
-async function doLogin() {
-  const email = document.getElementById("inp-email")?.value.trim();
-  const pw    = document.getElementById("inp-pw")?.value;
-  if (!email||!pw) { showErr("Vui lòng nhập đầy đủ."); return; }
-  try {
-    await signInWithEmailAndPassword(auth, email, pw);
-    setView("home");
-  } catch(e) {
-    showErr({ "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
-              "auth/user-not-found":"Tài khoản không tồn tại.",
-              "auth/wrong-password":"Mật khẩu không đúng.",
-              "auth/invalid-email":"Email không hợp lệ.",
-              "auth/too-many-requests":"Quá nhiều lần thử. Thử lại sau." }[e.code]
-           || "Đăng nhập thất bại.");
-  }
-}
-function showErr(msg) {
-  const el = document.getElementById("login-error");
-  if (el) { el.textContent = msg; el.style.display = "block"; }
-}
-
-// ── DRAFT ────────────────────────────────────────
-function scheduleSave() {
-  clearTimeout(autoTimer);
-  autoTimer = setTimeout(() => {
-    localStorage.setItem("blog_draft", JSON.stringify(draft));
-    const s = document.getElementById("save-status");
-    if (s) s.innerHTML = `<span style="color:var(--acc)">✓ Đã lưu nháp</span>`;
-  }, 800);
-}
-
-// ── ROUTING ──────────────────────────────────────
-function setView(v, id) {
-  view = v; if (id !== undefined) activeId = id;
-  window.scrollTo(0,0); render();
-}
-
-// ── HELPERS ──────────────────────────────────────
-function fmt(ts) {
-  if (!ts) return "";
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"})
-       + " · " + d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
-}
-function tagList(s) { return (s||"").split(",").map(t=>t.trim()).filter(Boolean); }
-function esc(s) {
-  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
-                      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-function filtered() {
-  if (!searchQuery) return posts;
-  const q = searchQuery.toLowerCase();
-  return posts.filter(p =>
-    p.title?.toLowerCase().includes(q) ||
-    p.content?.toLowerCase().includes(q) ||
-    (p.tags||"").toLowerCase().includes(q));
-}
-
-// ── ICONS ────────────────────────────────────────
-const ICO = {
-  sun:    `<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>`,
-  moon:   `<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>`,
-  edit:   `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
-  trash:  `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
-  write:  `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
-  img:    `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`,
-  back:   `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>`,
-  search: `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`,
-  chevr:  `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`
-};
-
-// ── RENDER ───────────────────────────────────────
-function render() { document.body.innerHTML = shell(mainContent()); bind(); }
-
-function searchBar(id) { return `
-  <div class="search-wrap">
-    <span class="search-ico">${ICO.search}</span>
-    <input id="${id}" class="search-inp" type="text"
-      placeholder="Tìm kiếm bài viết…" value="${esc(searchQuery)}"/>
-  </div>`; }
-
-function shell(inner) {
-  if (view === "login") return tLogin();
-  const isWrite = view==="write"||view==="edit";
-
-  const thIcon  = isDark() ? ICO.sun  : ICO.moon;
-  const thLabel = isDark() ? "Sáng"   : "Tối";
-
-  return `
-<!-- ── MOBILE HEADER ── -->
-<header class="hdr mob">
-  <div class="hdr-row">
-    <button id="go-home" class="site-name">
-      ${esc(PROFILE.name.split(" ").slice(-2).join(" "))}<em>.</em>
-    </button>
-    <div class="hdr-actions">
-      <button id="theme-toggle" class="theme-btn" title="Chuyển giao diện">${thIcon}</button>
-      ${currentUser
-        ? `<button id="go-write-m" class="btn btn-p btn-sm">+ Viết</button>
-           <button id="go-logout-m" class="btn btn-g btn-sm">Đăng xuất</button>`
-        : `<button id="go-login" class="btn btn-g btn-sm">Đăng nhập</button>`}
-    </div>
-  </div>
-  ${!isWrite ? `<div class="mob-search">${searchBar("search-m")}</div>` : ""}
-</header>
-
-<!-- ── PAGE ── -->
-<div class="page">
-  <div class="${isWrite ? "" : "page-grid"}">
-
-    <!-- ── SIDEBAR ── -->
-    ${!isWrite ? `
-    <aside class="sidebar desk">
-      <div class="sidebar-sticky">
-
-        <div class="avatar-wrap">
-          <div class="avatar">
-            ${PROFILE.avatar
-              ? `<img src="${esc(PROFILE.avatar)}" alt="avatar"/>`
-              : `<span class="avatar-txt">${esc(PROFILE.initials)}</span>`}
-          </div>
-          <p class="profile-name">${esc(PROFILE.name)}</p>
-          <p class="profile-bio">${esc(PROFILE.tagline)}</p>
-        </div>
-
-        <hr class="sidebar-divider"/>
-
-        <div class="stat-row">
-          <div class="stat-box">
-            <div class="stat-n">${posts.length}</div>
-            <div class="stat-l">Bài viết</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-n">${[...new Set(posts.flatMap(p=>tagList(p.tags)))].length}</div>
-            <div class="stat-l">Chủ đề</div>
-          </div>
-        </div>
-
-        ${searchBar("search-d")}
-
-        ${(()=>{
-          const all = [...new Set(posts.flatMap(p=>tagList(p.tags)))];
-          return all.length ? `
-            <div>
-              <div class="sb-label">Chủ đề</div>
-              <div class="tag-cloud">
-                ${all.map(t=>`<button class="tag-btn" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}
-              </div>
-            </div>` : "";
-        })()}
-
-        ${PROFILE.links.length ? `
-          <div>
-            <div class="sb-label">Liên kết</div>
-            <div class="sb-links">
-              ${PROFILE.links.map(l=>`
-                <a href="${esc(l.url)}" target="_blank" class="sb-link">
-                  <span class="sb-dot"></span>${esc(l.label)}
-                </a>`).join("")}
+                <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#donateModal">
+                    <i class="fa-solid fa-mug-hot"></i> Mời Cafe
+                </button>
             </div>
-          </div>` : ""}
-
-        <hr class="sidebar-divider"/>
-
-        <div class="sb-actions">
-          <button id="theme-toggle-d" class="btn btn-g" style="justify-content:center;gap:6px">
-            ${thIcon} Chế độ ${thLabel}
-          </button>
-          ${currentUser ? `
-            <button id="go-write" class="btn btn-p" style="justify-content:center;gap:6px;padding:9px 14px">
-              ${ICO.write} Viết bài mới
-            </button>
-            <button id="go-logout" class="btn btn-g" style="justify-content:center">Đăng xuất</button>
-            <p class="user-email">${esc(currentUser.email)}</p>`
-          : `<button id="go-login-side" class="btn btn-g" style="justify-content:center">
-               Đăng nhập quản trị
-             </button>`}
         </div>
-      </div>
-    </aside>` : ""}
+    </header>
 
-    <!-- ── MAIN ── -->
-    <div class="${isWrite ? "write-col" : "main-col"}">${inner}</div>
 
-  </div>
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Giới thiệu</h5>
+                        <p class="card-text text-secondary">
+                            Tôi là một đứa nhóc mang tầm vóc Tô Hoài. Web này là nơi tôi viết những gì tôi chưa nói.
+                        </p>
+                        <hr>
+                        <h6 class="fw-bold">Sở thích</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Đam mê chụp ảnh</li>
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Du lịch</li>
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Khám phá khoa học - kĩ thuật</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <h3 class="mb-4 fw-bold border-start border-4 border-primary ps-3">Bài viết mới nhất</h3>
+
+                
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="tag-tech">sn mt</span>
+            <small class="text-muted">15/04/2026</small>
+        </div>
+        <h5 class="card-title">
+            <a href="./post/cmsnmt.html" class="text-decoration-none text-dark">
+                "Mừng Thọ" thằng em
+            </a>
+        </h5>
+        <p class="card-text text-secondary">
+            Đôi lời gửi đến thằng bạn sắp thân
+        </p>
+    </div>
 </div>
 
-${isWrite ? `
-<div class="write-footer">
-  <button id="cancel-write" class="btn btn-g">Huỷ</button>
-  <button id="publish-btn"  class="btn btn-p">${editId?"Lưu thay đổi":"Đăng bài"}</button>
-</div>` : ""}`;
-}
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tag-tech">cmsn Cu Sun</span>
+                            <small class="text-muted">31/01/2026</small>
+                        </div>
+                        <h5 class="card-title">
+                            <a href="./post/cmsn.html" class="text-decoration-none text-dark" target="_blank">
+                                Lời chân thành từ sykoi
+                            </a>
+                        </h5>
+                        <p class="card-text text-secondary">
+                            không trải qua quá nhiều trải nghiệm với m nhưng cũng là một phần không thể thiếu trong kí ức của t...
+                        </p>
+                    </div>
+                </div>
 
-function mainContent() {
-  if (view==="write"||view==="edit") return tWrite();
-  if (view==="post") return tPost();
-  return tHome();
-}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tag-med">Ngẫu Hứng</span>
+                            <small class="text-muted">02/11/2025</small>
+                        </div>
+                        <h5 class="card-title">
+                            <a href="https://www.facebook.com/share/p/1DDsK46U3A/" class="text-decoration-none text-dark" target="_blank">
+                                Chào tháng 11, khép lại những dang dở và hối hả của tháng 10.
+                            </a>
+                        </h5>
+                        <p class="card-text text-secondary">
+                            Sáng nay thức dậy, tôi bỗng thấy hương hoa sữa ngào ngạt len lỏi vào phòng. Lá vàng bay bay, rồi lặng lẽ rụng...
+                        </p>
+                    </div>
+                </div>
 
-// ── HOME ─────────────────────────────────────────
-function tHome() {
-  if (!postsLoaded) return `
-    <div class="skel-list">
-      ${[1,2,3].map(()=>`
-        <div class="skel-item">
-          <div class="skel" style="height:12px;width:120px;margin-bottom:10px"></div>
-          <div class="skel" style="height:18px;width:70%;margin-bottom:8px"></div>
-          <div class="skel" style="height:13px;width:100%;margin-bottom:5px"></div>
-          <div class="skel" style="height:13px;width:80%"></div>
-        </div>`).join("")}
-    </div>`;
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tag-tech">Tình Nguyện</span>
+                            <small class="text-muted">01/08/2025</small>
+                        </div>
+                        <h5 class="card-title">
+                            <a href="./post/hienmau.html" class="text-decoration-none text-dark">
+                                Hiến máu tại Học Viện Quân Y
+                            </a>
+                        </h5>
+                        <p class="card-text text-secondary">
+                            Ngày mai, Học Viện Quân Y tổ chức một buổi hiến máu tình nguyện - Đây là một hoạt động thường niên mà nhà trường tổ chức mang đậm tính nhân đạo...
+                        </p>
+                    </div>
+                </div>
 
-  const list = filtered();
-
-  if (searchQuery && !list.length) return `
-    <div class="empty">
-      <div class="empty-ico">🔍</div>
-      <p style="font-size:.88rem">Không tìm thấy "<strong>${esc(searchQuery)}</strong>"</p>
-      <button id="clear-search" class="btn btn-g btn-sm" style="margin-top:14px">Xoá tìm kiếm</button>
-    </div>`;
-
-  if (!list.length) return `
-    <div class="empty">
-      <div class="empty-ico">✍️</div>
-      <p style="font-size:.88rem">Chưa có bài viết nào.</p>
-    </div>`;
-
-  return `
-    ${searchQuery ? `<p class="search-lbl">Kết quả: <strong style="color:var(--fg)">${esc(searchQuery)}</strong> — ${list.length} bài</p>` : ""}
-    <div class="post-list">
-      ${list.map(p => {
-        const thumb = (p.images||[]).find(Boolean);
-        return `
-        <article class="post-card" data-id="${esc(p.id)}">
-          <div class="pc-row">
-            <div class="pc-body">
-              <div class="pc-date">${esc(fmt(p.createdAt))}</div>
-              <h2 class="pc-title">${esc(p.title)}</h2>
-              <p class="pc-excerpt">${esc((p.content||"").replace(/@@IMG:[^@]+@@/g,"").slice(0,180))}</p>
-              ${tagList(p.tags).length ? `
-                <div class="pc-tags">
-                  ${tagList(p.tags).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}
-                </div>` : ""}
             </div>
-            ${thumb ? `<img src="${esc(thumb)}" class="pc-thumb" loading="lazy" alt=""/>` : ""}
-          </div>
-        </article>`;}).join("")}
-    </div>
-    <div class="post-count">${posts.length} bài viết</div>`;
-}
-
-// ── POST VIEW ─────────────────────────────────────
-function tPost() {
-  const p = posts.find(x=>x.id===activeId);
-  if (!p) return tHome();
-  return `
-    <div class="post-view">
-      <button id="go-back" class="back-btn">${ICO.back} Trang chủ</button>
-      <div class="pv-date">${esc(fmt(p.createdAt))}</div>
-      <h1 class="pv-title">${esc(p.title)}</h1>
-      ${tagList(p.tags).length ? `
-        <div class="pv-tags">${tagList(p.tags).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
-      <hr class="pv-rule"/>
-      <div class="pv-body">${renderContent(p.content)}</div>
-      ${currentUser ? `
-        <div class="pv-actions">
-          <button id="go-edit" data-id="${esc(p.id)}" class="btn btn-g">${ICO.edit} Chỉnh sửa</button>
-          <button id="go-delete" data-id="${esc(p.id)}" class="btn btn-danger">${ICO.trash} Xoá bài</button>
-        </div>` : ""}
-    </div>`;
-}
-
-// ── WRITE ─────────────────────────────────────────
-function tWrite() {
-  return `
-    <div class="wr-topbar">
-      <span class="wr-label">${editId?"Chỉnh sửa bài":"Bài viết mới"}</span>
-      <span id="save-status" class="wr-save"></span>
+        </div>
     </div>
 
-    <textarea id="inp-title" class="wr-title" rows="1"
-      placeholder="Tiêu đề bài viết…">${esc(draft.title)}</textarea>
+    <footer class="text-center py-4 text-muted border-top">
+        <small>&copy; 2026 Sỹ Kòi. Built with Bootstrap 5.</small>
+    </footer>
 
-    <input id="inp-tags" class="wr-tags" type="text"
-      placeholder="Thẻ tag (phẩy ngăn cách): y học, tim mạch…"
-      value="${esc(draft.tags)}"/>
-
-    <div class="img-toolbar">
-      <div class="img-tb-hdr">
-        <span class="img-tb-lbl">Chèn ảnh</span>
-        <label class="img-file-label btn btn-g btn-sm">
-          ${ICO.img} Chọn ảnh
-          <input id="img-file-input" type="file" accept="image/*" multiple style="display:none"/>
-        </label>
-        <span id="upload-status" style="font-size:.75rem;color:var(--fg3)"></span>
-      </div>
-      <div class="img-tb-body">
-        <div class="progress-bar" id="prog-bar" style="display:none">
-          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    <div class="modal fade" id="zaloModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Quét mã kết bạn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="./media/zalo-qr.png" alt="Zalo QR" class="img-fluid" style="max-width: 200px;">
+                    <p class="mt-2 small text-muted">Mở Zalo và quét mã để kết nối</p>
+                </div>
+            </div>
         </div>
-        <div class="img-preview-grid" id="img-preview-grid">
-          ${(draft.images||[]).map((u,i)=>`
-            <div class="img-preview-item">
-              <img src="${esc(u)}" alt="img"/>
-              <button class="rm-img" data-i="${i}">✕</button>
-            </div>`).join("")}
-        </div>
-        ${!(draft.images||[]).length
-          ? `<p style="font-size:.75rem;color:var(--fg3)">Ảnh sẽ chèn vào vị trí con trỏ trong nội dung</p>` : ""}
-      </div>
     </div>
 
-    <textarea id="inp-content" class="wr-content"
-      placeholder="Bắt đầu viết nội dung của bạn…&#10;&#10;Tự động lưu nháp mỗi lúc bạn gõ."
-    >${esc(draft.content)}</textarea>`;
-}
-
-// ── LOGIN ─────────────────────────────────────────
-function tLogin() {
-  return `
-    <div class="login-page">
-      <div class="login-card">
-        <div class="login-avatar-wrap">
-          <div class="login-av">
-            <span>${esc(PROFILE.initials)}</span>
-          </div>
-          <h1 class="login-h">Đăng nhập</h1>
-          <p class="login-sub">Tài khoản quản trị viên</p>
+    <div class="modal fade" id="donateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Ủng hộ sỹ <i class="fa-solid fa-heart text-danger"></i></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="https://img.vietqr.io/image/VCB-1031324778-compact.jpg?addInfo=Moi%20Sy%20Uong%20Cafe" 
+                         alt="QR Chuyển khoản" class="img-fluid rounded mb-2">
+                    
+                    <p class="small text-muted mb-1">Quét mã để chuyển khoản nhanh</p>
+                    <div class="bg-light p-2 rounded">
+                        <p class="mb-0 fw-bold text-dark">Vietcombank </p>
+                        <p class="mb-0 text-primary fw-bold">1031324778</p> 
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="login-box">
-          <div id="login-error" class="login-err" style="display:none"></div>
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input id="inp-email" class="form-input" type="email"
-              autocomplete="email" placeholder="admin@example.com"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mật khẩu</label>
-            <input id="inp-pw" class="form-input" type="password"
-              autocomplete="current-password" placeholder="••••••••"/>
-          </div>
-          <button id="login-btn" class="btn btn-p btn-full" style="margin-top:8px">Đăng nhập</button>
-          <button id="back-from-login" class="btn btn-g btn-full" style="margin-top:8px">← Quay lại</button>
-        </div>
-      </div>
-    </div>`;
-}
+    </div>
 
-// ── BIND ──────────────────────────────────────────
-function bind() {
-  const on = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
-
-  on("go-home",         "click", () => { searchQuery=""; setView("home"); });
-  on("go-back",         "click", () => setView("home"));
-  on("go-login",        "click", () => setView("login"));
-  on("go-login-side",   "click", () => setView("login"));
-  on("back-from-login", "click", () => setView("home"));
-  on("go-logout",       "click", () => { signOut(auth); setView("home"); });
-  on("go-logout-m",     "click", () => { signOut(auth); setView("home"); });
-  on("clear-search",    "click", () => { searchQuery=""; render(); });
-  on("theme-toggle",    "click", toggleTheme);
-  on("theme-toggle-d",  "click", toggleTheme);
-
-  const openWrite = () => {
-    const s = localStorage.getItem("blog_draft");
-    draft   = s ? JSON.parse(s) : { title:"", content:"", tags:"", images:[] };
-    if (!draft.images) draft.images = [];
-    editId  = null;
-    setView("write");
-  };
-  on("go-write",   "click", openWrite);
-  on("go-write-m", "click", openWrite);
-
-  // Search
-  ["search-d","search-m"].forEach(id => {
-    document.getElementById(id)?.addEventListener("input", e => {
-      searchQuery = e.target.value;
-      const list  = filtered();
-      // Re-render chỉ vùng post list thay vì toàn trang
-      const main  = document.querySelector(".main-col");
-      if (main) { main.innerHTML = tHome(); bindList(); }
-      setTimeout(() => document.getElementById(id)?.focus(), 5);
-    });
-  });
-
-  // Tag filter
-  document.querySelectorAll(".tag-btn").forEach(el =>
-    el.addEventListener("click", () => { searchQuery = el.dataset.tag; render(); }));
-
-  bindList();
-
-  // Write
-  on("cancel-write","click", () => { setView("home"); editId=null; });
-  on("publish-btn", "click", async () => {
-    const t = document.getElementById("inp-title")?.value.trim();
-    const c = document.getElementById("inp-content")?.value.trim();
-    if (!t||!c) { alert("Vui lòng nhập tiêu đề và nội dung."); return; }
-    draft.title   = t; draft.content = c;
-    draft.tags    = document.getElementById("inp-tags")?.value||"";
-    const btn = document.getElementById("publish-btn");
-    if (btn) { btn.disabled=true; btn.textContent="Đang lưu…"; }
-    try { await savePost(); }
-    catch(e) { alert("Lỗi: "+e.message); if(btn){btn.disabled=false; btn.textContent=editId?"Lưu thay đổi":"Đăng bài";} }
-  });
-
-  on("img-file-input","change", async e => {
-    if (e.target.files?.length) await handleImages(Array.from(e.target.files));
-  });
-
-  document.querySelectorAll(".rm-img").forEach(el => el.addEventListener("click", ev => {
-    ev.stopPropagation();
-    const i   = +el.dataset.i;
-    const url = draft.images[i];
-    draft.images.splice(i,1);
-    const ta = document.getElementById("inp-content");
-    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,""); draft.content=ta.value; }
-    renderPreviews();
-  }));
-
-  ["inp-title","inp-content","inp-tags"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener("input", () => {
-      draft.title   = document.getElementById("inp-title")?.value   ?? draft.title;
-      draft.content = document.getElementById("inp-content")?.value ?? draft.content;
-      draft.tags    = document.getElementById("inp-tags")?.value    ?? draft.tags;
-      scheduleSave();
-    });
-    if (id==="inp-title") {
-      el.style.height = "auto"; el.style.height = el.scrollHeight+"px";
-      el.addEventListener("input",()=>{el.style.height="auto"; el.style.height=el.scrollHeight+"px";});
-    }
-  });
-
-  on("login-btn","click", doLogin);
-  on("inp-pw","keydown", e => { if(e.key==="Enter") doLogin(); });
-  setTimeout(() => {
-    document.getElementById("inp-email")?.focus();
-    document.getElementById("inp-title")?.focus();
-  }, 20);
-}
-
-function bindList() {
-  document.querySelectorAll(".post-card").forEach(el =>
-    el.addEventListener("click", () => setView("post", el.dataset.id)));
-
-  const on = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
-  on("go-edit", "click", e => {
-    const p = posts.find(x=>x.id===e.currentTarget.dataset.id);
-    if (p) { draft={title:p.title,content:p.content,tags:p.tags||"",images:p.images||[]}; editId=p.id; setView("edit"); }
-  });
-  on("go-delete","click", e => {
-    if (confirm("Xoá bài viết này? Không thể hoàn tác.")) deletePost(e.currentTarget.dataset.id);
-  });
-}
-
-</script>
-</head>
-<body>
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--fg3);font-size:.9rem">
-    Đang kết nối…
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
