@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>một chút tinh nghịch...</title>
+<title>một chút nghịch ngợm...</title>
 
  <meta property="og:title" content="ST82">
 <meta property="og:description" content="một góc để tôi kể chuyện đời thường">
@@ -18,6 +18,11 @@
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
 <link rel="dns-prefetch" href="https://api.imgbb.com"/>
+
+<!-- ② modulepreload: tải & parse Firebase song song, không chờ tuần tự -->
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"/>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"/>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"/>
 
 <!-- ② Font: chỉ lấy đúng weight cần dùng + display=swap (không block render) -->
 <link rel="stylesheet"
@@ -193,18 +198,6 @@ img{max-width:100%;display:block}
 .progress-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:var(--acc);transition:width .3s;border-radius:2px}
 
-/* ── IMAGE GRID ─────────────────────────────────────────────── */
-.img-grid{display:grid;gap:3px;border-radius:10px;overflow:hidden;margin:16px 0}
-.img-grid-1{grid-template-columns:1fr}
-.img-grid-2{grid-template-columns:1fr 1fr}
-.img-grid-3{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
-.img-grid-3 .gi:first-child{grid-column:1/-1}
-.img-grid-4{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
-.gi{overflow:hidden;aspect-ratio:1/1;background:var(--bg2)}
-.img-grid-1 .gi{aspect-ratio:16/9}
-.gi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
-.gi img:hover{transform:scale(1.03)}
-
 /* ── LOGIN ─────────────────────────────────────────────────── */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg)}
 .login-card{width:100%;max-width:340px}
@@ -247,12 +240,12 @@ const IMGBB_API_KEY = "0f011b149aaca94b0280a6fb49e6f501"; // ← API key ImgBB
 
 const PROFILE = {
   name:     "SỸ TRẦN",
-  tagline:  "Ghi lại chút cảm xúc đời thường.",
+  tagline:  "vài câu chuyện thường ngày.",
   avatar:   "./media/avatar.jpg",       // URL ảnh — để trống = dùng chữ viết tắt
   initials: "ST",
   links:    [
-    // { label:"Facebook", url:"https://www.facebook.com/share/1ENwRoym9w/ },
-    // { label:"Email",    url:"mailto:hiept6736@gmail.com"    },
+     { label:"Facebook", url:"https://www.facebook.com/share/14RDNUiZKQA/" },
+     { label:"Email",    url:"mailto:hiept6736@gmail.com"    },
   ]
 };
 // ════════════════════════════════════════════════
@@ -388,6 +381,478 @@ function renderPreviews() {
   }));
 }
 
-// ── GRID IMAGE UPLOAD ────────────────────────────
-async function handleGridImages(files) {
-  const st = document.getElement
+// ── CONTENT RENDERER ─────────────────────────────
+function renderContent(text) {
+  return (text||"").split(/(@@IMG:[^@]+@@)/g).map(p => {
+    const m = p.match(/^@@IMG:(.+)@@$/);
+    return m ? `<img src="${esc(m[1])}" class="post-img" loading="lazy" alt="ảnh"/>`
+             : `<span>${esc(p)}</span>`;
+  }).join("");
+}
+
+// ── AUTH ACTIONS ─────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById("inp-email")?.value.trim();
+  const pw    = document.getElementById("inp-pw")?.value;
+  if (!email||!pw) { showErr("Vui lòng nhập đầy đủ."); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+    setView("home");
+  } catch(e) {
+    showErr({ "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
+              "auth/user-not-found":"Tài khoản không tồn tại.",
+              "auth/wrong-password":"Mật khẩu không đúng.",
+              "auth/invalid-email":"Email không hợp lệ.",
+              "auth/too-many-requests":"Quá nhiều lần thử. Thử lại sau." }[e.code]
+           || "Đăng nhập thất bại.");
+  }
+}
+function showErr(msg) {
+  const el = document.getElementById("login-error");
+  if (el) { el.textContent = msg; el.style.display = "block"; }
+}
+
+// ── DRAFT ────────────────────────────────────────
+function scheduleSave() {
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() => {
+    localStorage.setItem("blog_draft", JSON.stringify(draft));
+    const s = document.getElementById("save-status");
+    if (s) s.innerHTML = `<span style="color:var(--acc)">✓ Đã lưu nháp</span>`;
+  }, 800);
+}
+
+// ── ROUTING ──────────────────────────────────────
+function setView(v, id) {
+  view = v; if (id !== undefined) activeId = id;
+  window.scrollTo(0,0); render();
+}
+
+// ── HELPERS ──────────────────────────────────────
+function fmt(ts) {
+  if (!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"})
+       + " · " + d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
+}
+function tagList(s) { return (s||"").split(",").map(t=>t.trim()).filter(Boolean); }
+function esc(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
+                      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function filtered() {
+  if (!searchQuery) return posts;
+  const q = searchQuery.toLowerCase();
+  return posts.filter(p =>
+    p.title?.toLowerCase().includes(q) ||
+    p.content?.toLowerCase().includes(q) ||
+    (p.tags||"").toLowerCase().includes(q));
+}
+
+// ── ICONS ────────────────────────────────────────
+const ICO = {
+  sun:    `<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>`,
+  moon:   `<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>`,
+  edit:   `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
+  trash:  `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
+  write:  `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
+  img:    `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`,
+  back:   `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>`,
+  search: `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`,
+  chevr:  `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`
+};
+
+// ── RENDER ───────────────────────────────────────
+function render() { document.body.innerHTML = shell(mainContent()); bind(); }
+
+function searchBar(id) { return `
+  <div class="search-wrap">
+    <span class="search-ico">${ICO.search}</span>
+    <input id="${id}" class="search-inp" type="text"
+      placeholder="Tìm kiếm bài viết…" value="${esc(searchQuery)}"/>
+  </div>`; }
+
+function shell(inner) {
+  if (view === "login") return tLogin();
+  const isWrite = view==="write"||view==="edit";
+
+  const thIcon  = isDark() ? ICO.sun  : ICO.moon;
+  const thLabel = isDark() ? "Sáng"   : "Tối";
+
+  return `
+<!-- ── MOBILE HEADER ── -->
+<header class="hdr mob">
+  <div class="hdr-row">
+    <button id="go-home" class="site-name">
+      ${esc(PROFILE.name.split(" ").slice(-2).join(" "))}<em>.</em>
+    </button>
+    <div class="hdr-actions">
+      <button id="theme-toggle" class="theme-btn" title="Chuyển giao diện">${thIcon}</button>
+      ${currentUser
+        ? `<button id="go-write-m" class="btn btn-p btn-sm">+ Viết</button>
+           <button id="go-logout-m" class="btn btn-g btn-sm">Đăng xuất</button>`
+        : `<button id="go-login" class="btn btn-g btn-sm">Đăng nhập</button>`}
+    </div>
+  </div>
+  ${!isWrite ? `<div class="mob-search">${searchBar("search-m")}</div>` : ""}
+</header>
+
+<!-- ── PAGE ── -->
+<div class="page">
+  <div class="${isWrite ? "" : "page-grid"}">
+
+    <!-- ── SIDEBAR ── -->
+    ${!isWrite ? `
+    <aside class="sidebar desk">
+      <div class="sidebar-sticky">
+
+        <div class="avatar-wrap">
+          <div class="avatar">
+            ${PROFILE.avatar
+              ? `<img src="${esc(PROFILE.avatar)}" alt="avatar"/>`
+              : `<span class="avatar-txt">${esc(PROFILE.initials)}</span>`}
+          </div>
+          <p class="profile-name">${esc(PROFILE.name)}</p>
+          <p class="profile-bio">${esc(PROFILE.tagline)}</p>
+        </div>
+
+        <hr class="sidebar-divider"/>
+
+        <div class="stat-row">
+          <div class="stat-box">
+            <div class="stat-n">${posts.length}</div>
+            <div class="stat-l">Bài viết</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-n">${[...new Set(posts.flatMap(p=>tagList(p.tags)))].length}</div>
+            <div class="stat-l">Chủ đề</div>
+          </div>
+        </div>
+
+        ${searchBar("search-d")}
+
+        ${(()=>{
+          const all = [...new Set(posts.flatMap(p=>tagList(p.tags)))];
+          return all.length ? `
+            <div>
+              <div class="sb-label">Chủ đề</div>
+              <div class="tag-cloud">
+                ${all.map(t=>`<button class="tag-btn" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}
+              </div>
+            </div>` : "";
+        })()}
+
+        ${PROFILE.links.length ? `
+          <div>
+            <div class="sb-label">Liên kết</div>
+            <div class="sb-links">
+              ${PROFILE.links.map(l=>`
+                <a href="${esc(l.url)}" target="_blank" class="sb-link">
+                  <span class="sb-dot"></span>${esc(l.label)}
+                </a>`).join("")}
+            </div>
+          </div>` : ""}
+
+        <hr class="sidebar-divider"/>
+
+        <div class="sb-actions">
+          <button id="theme-toggle-d" class="btn btn-g" style="justify-content:center;gap:6px">
+            ${thIcon} Chế độ ${thLabel}
+          </button>
+          ${currentUser ? `
+            <button id="go-write" class="btn btn-p" style="justify-content:center;gap:6px;padding:9px 14px">
+              ${ICO.write} Viết bài mới
+            </button>
+            <button id="go-logout" class="btn btn-g" style="justify-content:center">Đăng xuất</button>
+            <p class="user-email">${esc(currentUser.email)}</p>`
+          : `<button id="go-login-side" class="btn btn-g" style="justify-content:center">
+               Đăng nhập quản trị
+             </button>`}
+        </div>
+      </div>
+    </aside>` : ""}
+
+    <!-- ── MAIN ── -->
+    <div class="${isWrite ? "write-col" : "main-col"}">${inner}</div>
+
+  </div>
+</div>
+
+${isWrite ? `
+<div class="write-footer">
+  <button id="cancel-write" class="btn btn-g">Huỷ</button>
+  <button id="publish-btn"  class="btn btn-p">${editId?"Lưu thay đổi":"Đăng bài"}</button>
+</div>` : ""}`;
+}
+
+function mainContent() {
+  if (view==="write"||view==="edit") return tWrite();
+  if (view==="post") return tPost();
+  return tHome();
+}
+
+// ── HOME ─────────────────────────────────────────
+function tHome() {
+  if (!postsLoaded) return `
+    <div class="skel-list">
+      ${[1,2,3].map(()=>`
+        <div class="skel-item">
+          <div class="skel" style="height:12px;width:120px;margin-bottom:10px"></div>
+          <div class="skel" style="height:18px;width:70%;margin-bottom:8px"></div>
+          <div class="skel" style="height:13px;width:100%;margin-bottom:5px"></div>
+          <div class="skel" style="height:13px;width:80%"></div>
+        </div>`).join("")}
+    </div>`;
+
+  const list = filtered();
+
+  if (searchQuery && !list.length) return `
+    <div class="empty">
+      <div class="empty-ico">🔍</div>
+      <p style="font-size:.88rem">Không tìm thấy "<strong>${esc(searchQuery)}</strong>"</p>
+      <button id="clear-search" class="btn btn-g btn-sm" style="margin-top:14px">Xoá tìm kiếm</button>
+    </div>`;
+
+  if (!list.length) return `
+    <div class="empty">
+      <div class="empty-ico">✍️</div>
+      <p style="font-size:.88rem">Chưa có bài viết nào.</p>
+    </div>`;
+
+  return `
+    ${searchQuery ? `<p class="search-lbl">Kết quả: <strong style="color:var(--fg)">${esc(searchQuery)}</strong> — ${list.length} bài</p>` : ""}
+    <div class="post-list">
+      ${list.map(p => {
+        const thumb = (p.images||[]).find(Boolean);
+        return `
+        <article class="post-card" data-id="${esc(p.id)}">
+          <div class="pc-row">
+            <div class="pc-body">
+              <div class="pc-date">${esc(fmt(p.createdAt))}</div>
+              <h2 class="pc-title">${esc(p.title)}</h2>
+              <p class="pc-excerpt">${esc((p.content||"").replace(/@@IMG:[^@]+@@/g,"").slice(0,180))}</p>
+              ${tagList(p.tags).length ? `
+                <div class="pc-tags">
+                  ${tagList(p.tags).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}
+                </div>` : ""}
+            </div>
+            ${thumb ? `<img src="${esc(thumb)}" class="pc-thumb" loading="lazy" alt=""/>` : ""}
+          </div>
+        </article>`;}).join("")}
+    </div>
+    <div class="post-count">${posts.length} bài viết</div>`;
+}
+
+// ── POST VIEW ─────────────────────────────────────
+function tPost() {
+  const p = posts.find(x=>x.id===activeId);
+  if (!p) return tHome();
+  return `
+    <div class="post-view">
+      <button id="go-back" class="back-btn">${ICO.back} Trang chủ</button>
+      <div class="pv-date">${esc(fmt(p.createdAt))}</div>
+      <h1 class="pv-title">${esc(p.title)}</h1>
+      ${tagList(p.tags).length ? `
+        <div class="pv-tags">${tagList(p.tags).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
+      <hr class="pv-rule"/>
+      <div class="pv-body">${renderContent(p.content)}</div>
+      ${currentUser ? `
+        <div class="pv-actions">
+          <button id="go-edit" data-id="${esc(p.id)}" class="btn btn-g">${ICO.edit} Chỉnh sửa</button>
+          <button id="go-delete" data-id="${esc(p.id)}" class="btn btn-danger">${ICO.trash} Xoá bài</button>
+        </div>` : ""}
+    </div>`;
+}
+
+// ── WRITE ─────────────────────────────────────────
+function tWrite() {
+  return `
+    <div class="wr-topbar">
+      <span class="wr-label">${editId?"Chỉnh sửa bài":"Bài viết mới"}</span>
+      <span id="save-status" class="wr-save"></span>
+    </div>
+
+    <textarea id="inp-title" class="wr-title" rows="1"
+      placeholder="Tiêu đề bài viết…">${esc(draft.title)}</textarea>
+
+    <input id="inp-tags" class="wr-tags" type="text"
+      placeholder="Thẻ tag (phẩy ngăn cách): y học, tim mạch…"
+      value="${esc(draft.tags)}"/>
+
+    <div class="img-toolbar">
+      <div class="img-tb-hdr">
+        <span class="img-tb-lbl">Chèn ảnh</span>
+        <label class="img-file-label btn btn-g btn-sm">
+          ${ICO.img} Chọn ảnh
+          <input id="img-file-input" type="file" accept="image/*" multiple style="display:none"/>
+        </label>
+        <span id="upload-status" style="font-size:.75rem;color:var(--fg3)"></span>
+      </div>
+      <div class="img-tb-body">
+        <div class="progress-bar" id="prog-bar" style="display:none">
+          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+        <div class="img-preview-grid" id="img-preview-grid">
+          ${(draft.images||[]).map((u,i)=>`
+            <div class="img-preview-item">
+              <img src="${esc(u)}" alt="img"/>
+              <button class="rm-img" data-i="${i}">✕</button>
+            </div>`).join("")}
+        </div>
+        ${!(draft.images||[]).length
+          ? `<p style="font-size:.75rem;color:var(--fg3)">Ảnh sẽ chèn vào vị trí con trỏ trong nội dung</p>` : ""}
+      </div>
+    </div>
+
+    <textarea id="inp-content" class="wr-content"
+      placeholder="Bắt đầu viết nội dung của bạn…&#10;&#10;Tự động lưu nháp mỗi lúc bạn gõ."
+    >${esc(draft.content)}</textarea>`;
+}
+
+// ── LOGIN ─────────────────────────────────────────
+function tLogin() {
+  return `
+    <div class="login-page">
+      <div class="login-card">
+        <div class="login-avatar-wrap">
+          <div class="login-av">
+            <span>${esc(PROFILE.initials)}</span>
+          </div>
+          <h1 class="login-h">Đăng nhập</h1>
+          <p class="login-sub">Tài khoản quản trị viên</p>
+        </div>
+        <div class="login-box">
+          <div id="login-error" class="login-err" style="display:none"></div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input id="inp-email" class="form-input" type="email"
+              autocomplete="email" placeholder="admin@example.com"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mật khẩu</label>
+            <input id="inp-pw" class="form-input" type="password"
+              autocomplete="current-password" placeholder="••••••••"/>
+          </div>
+          <button id="login-btn" class="btn btn-p btn-full" style="margin-top:8px">Đăng nhập</button>
+          <button id="back-from-login" class="btn btn-g btn-full" style="margin-top:8px">← Quay lại</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── BIND ──────────────────────────────────────────
+function bind() {
+  const on = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
+
+  on("go-home",         "click", () => { searchQuery=""; setView("home"); });
+  on("go-back",         "click", () => setView("home"));
+  on("go-login",        "click", () => setView("login"));
+  on("go-login-side",   "click", () => setView("login"));
+  on("back-from-login", "click", () => setView("home"));
+  on("go-logout",       "click", () => { signOut(auth); setView("home"); });
+  on("go-logout-m",     "click", () => { signOut(auth); setView("home"); });
+  on("clear-search",    "click", () => { searchQuery=""; render(); });
+  on("theme-toggle",    "click", toggleTheme);
+  on("theme-toggle-d",  "click", toggleTheme);
+
+  const openWrite = () => {
+    const s = localStorage.getItem("blog_draft");
+    draft   = s ? JSON.parse(s) : { title:"", content:"", tags:"", images:[] };
+    if (!draft.images) draft.images = [];
+    editId  = null;
+    setView("write");
+  };
+  on("go-write",   "click", openWrite);
+  on("go-write-m", "click", openWrite);
+
+  // Search
+  ["search-d","search-m"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", e => {
+      searchQuery = e.target.value;
+      const list  = filtered();
+      // Re-render chỉ vùng post list thay vì toàn trang
+      const main  = document.querySelector(".main-col");
+      if (main) { main.innerHTML = tHome(); bindList(); }
+      setTimeout(() => document.getElementById(id)?.focus(), 5);
+    });
+  });
+
+  // Tag filter
+  document.querySelectorAll(".tag-btn").forEach(el =>
+    el.addEventListener("click", () => { searchQuery = el.dataset.tag; render(); }));
+
+  bindList();
+
+  // Write
+  on("cancel-write","click", () => { setView("home"); editId=null; });
+  on("publish-btn", "click", async () => {
+    const t = document.getElementById("inp-title")?.value.trim();
+    const c = document.getElementById("inp-content")?.value.trim();
+    if (!t||!c) { alert("Vui lòng nhập tiêu đề và nội dung."); return; }
+    draft.title   = t; draft.content = c;
+    draft.tags    = document.getElementById("inp-tags")?.value||"";
+    const btn = document.getElementById("publish-btn");
+    if (btn) { btn.disabled=true; btn.textContent="Đang lưu…"; }
+    try { await savePost(); }
+    catch(e) { alert("Lỗi: "+e.message); if(btn){btn.disabled=false; btn.textContent=editId?"Lưu thay đổi":"Đăng bài";} }
+  });
+
+  on("img-file-input","change", async e => {
+    if (e.target.files?.length) await handleImages(Array.from(e.target.files));
+  });
+
+  document.querySelectorAll(".rm-img").forEach(el => el.addEventListener("click", ev => {
+    ev.stopPropagation();
+    const i   = +el.dataset.i;
+    const url = draft.images[i];
+    draft.images.splice(i,1);
+    const ta = document.getElementById("inp-content");
+    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,""); draft.content=ta.value; }
+    renderPreviews();
+  }));
+
+  ["inp-title","inp-content","inp-tags"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      draft.title   = document.getElementById("inp-title")?.value   ?? draft.title;
+      draft.content = document.getElementById("inp-content")?.value ?? draft.content;
+      draft.tags    = document.getElementById("inp-tags")?.value    ?? draft.tags;
+      scheduleSave();
+    });
+    if (id==="inp-title") {
+      el.style.height = "auto"; el.style.height = el.scrollHeight+"px";
+      el.addEventListener("input",()=>{el.style.height="auto"; el.style.height=el.scrollHeight+"px";});
+    }
+  });
+
+  on("login-btn","click", doLogin);
+  on("inp-pw","keydown", e => { if(e.key==="Enter") doLogin(); });
+  setTimeout(() => {
+    document.getElementById("inp-email")?.focus();
+    document.getElementById("inp-title")?.focus();
+  }, 20);
+}
+
+function bindList() {
+  document.querySelectorAll(".post-card").forEach(el =>
+    el.addEventListener("click", () => setView("post", el.dataset.id)));
+
+  const on = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
+  on("go-edit", "click", e => {
+    const p = posts.find(x=>x.id===e.currentTarget.dataset.id);
+    if (p) { draft={title:p.title,content:p.content,tags:p.tags||"",images:p.images||[]}; editId=p.id; setView("edit"); }
+  });
+  on("go-delete","click", e => {
+    if (confirm("Xoá bài viết này? Không thể hoàn tác.")) deletePost(e.currentTarget.dataset.id);
+  });
+}
+
+</script>
+</head>
+<body>
+  <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--fg3);font-size:.9rem">
+    Đang kết nối…
+  </div>
+</body>
+</html>
