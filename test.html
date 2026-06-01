@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      một chút nghịch ngợm...
+    </title>
+    <meta property="og:title" content="ST82" />
+    <meta property="og:description" content="một góc để tôi kể chuyện đời thường" />
+    <meta property="og:image" content="https://sykoi82.github.io/media/Thumbnail.png" />
+    <meta property="og:url" content="https://sykoi82.github.io" />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/png" href="media/Logo.png" />
+    <!-- ① Preconnect: kết nối song song trước khi tải -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin="" />
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin="" />
+    <link rel="dns-prefetch" href="https://api.imgbb.com" />
+    <!-- ② modulepreload: tải & parse Firebase song song, không chờ tuần tự -->
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js" />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js" />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js" />
+    <!-- ② Font: chỉ lấy đúng weight cần dùng + display=swap (không block render) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,400&amp;family=DM+Sans:wght@400;500&amp;display=swap" media="print" onload="this.media=&#39;all&#39;" />
+    <noscript>
+      &lt;link rel=&#34;stylesheet&#34;
+    href=&#34;https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,400&amp;family=DM+Sans:wght@400;500&amp;display=swap&#34;/&gt;
+    </noscript>
+    <!-- ③ Dark mode trước render để không bị flash trắng -->
+    <script>
+      (function(){
+  var s=localStorage.getItem(&#34;theme&#34;);
+  if(s===&#34;light&#34;) document.documentElement.classList.remove(&#34;dark&#34;);
+  else document.documentElement.classList.add(&#34;dark&#34;);
+})();
+    </script>
+    <style>
+      /* ── THEME VARIABLES ───────────────────────────────────────── */
+:root{
+  --bg:#faf9f7; --bg2:#f0ede8; --bg3:#fff;
+  --fg:#1a1816; --fg2:#4a4643; --fg3:#9b9490;
+  --bdr:#e2ddd7; --acc:#b5451b; --acc2:#e8d5c4;
+  --ph:#9b9490; --hdr:rgba(250,249,247,.93); --shd:rgba(0,0,0,.06);
+}
+html.dark{
+  --bg:#111010; --bg2:#1c1b1a; --bg3:#1e1d1c;
+  --fg:#e8e4e0; --fg2:#a8a4a0; --fg3:#5a5856;
+  --bdr:#2e2c2a; --acc:#d4622a; --acc2:#3d2215;
+  --ph:#6b6764; --hdr:rgba(17,16,16,.93); --shd:rgba(0,0,0,.3);
+}
+
+/* ── RESET ─────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:&#39;DM Sans&#39;,system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;line-height:1.5}
+textarea,input{font-family:inherit;background:transparent;border:none;outline:none;color:var(--fg)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+::placeholder{color:var(--ph)!important;opacity:1!important}
+
+/* ── LAYOUT ────────────────────────────────────────────────── */
+.page{max-width:1152px;margin:0 auto;padding:0 32px}
+.page-grid{display:grid;grid-template-columns:260px 1fr;gap:56px}
+.main-col{min-height:100vh;padding:40px 0}
+.write-col{max-width:720px;margin:0 auto;padding:32px 0 96px}
+@media(max-width:1023px){
+  .page{padding:0}
+  .page-grid{display:block}
+  .main-col{padding:20px 16px 40px}
+  .desk{display:none!important}
+}
+@media(min-width:1024px){.mob{display:none!important}}
+
+/* ── HEADER ────────────────────────────────────────────────── */
+.hdr{position:sticky;top:0;z-index:50;background:var(--hdr);backdrop-filter:blur(10px);border-bottom:1px solid var(--bdr)}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px}
+.site-name{font-family:&#39;Lora&#39;,Georgia,serif;font-size:1.2rem;font-weight:600;color:var(--fg)}
+.site-name em{color:var(--acc);font-style:normal}
+.hdr-actions{display:flex;align-items:center;gap:8px}
+.mob-search{padding:0 16px 11px;position:relative}
+
+/* ── BUTTONS ───────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:.82rem;font-weight:500;border-radius:7px;padding:6px 14px;transition:all .15s;cursor:pointer;line-height:1}
+.btn-p{background:var(--acc);color:#fff;border:1px solid transparent}
+.btn-p:hover{opacity:.87}
+.btn-p:disabled{opacity:.45;cursor:not-allowed}
+.btn-g{background:none;color:var(--fg2);border:1px solid var(--bdr)}
+.btn-g:hover{background:var(--bg2)}
+.btn-danger{background:none;color:#ef4444;border:1px solid rgba(239,68,68,.4)}
+.btn-danger:hover{background:rgba(239,68,68,.07)}
+.btn-sm{padding:4px 10px;font-size:.76rem}
+.btn-full{width:100%;justify-content:center;padding:10px 14px}
+.theme-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);color:var(--fg3);transition:all .15s;flex-shrink:0}
+.theme-btn:hover{background:var(--bg2);color:var(--fg)}
+
+/* ── SIDEBAR ───────────────────────────────────────────────── */
+.sidebar{padding:40px 0}
+.sidebar-sticky{position:sticky;top:40px;display:flex;flex-direction:column;gap:24px}
+.sidebar-divider{border:none;border-top:1px solid var(--bdr)}
+.avatar-wrap{text-align:center}
+.avatar{width:88px;height:88px;border-radius:50%;margin:0 auto;background:linear-gradient(135deg,var(--acc),#7a2e0e);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px var(--shd)}
+.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.avatar-txt{color:#fff;font-family:&#39;Lora&#39;,serif;font-size:1.6rem;font-weight:600}
+.profile-name{margin-top:14px;font-family:&#39;Lora&#39;,serif;font-size:1.1rem;font-weight:600;color:var(--fg)}
+.profile-bio{margin-top:7px;font-size:.83rem;color:var(--fg3);line-height:1.55}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}
+.stat-box{background:var(--bg2);border-radius:10px;padding:12px 8px}
+.stat-n{font-size:1.3rem;font-weight:600;color:var(--fg)}
+.stat-l{font-size:.7rem;color:var(--fg3);margin-top:2px}
+.sb-label{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px}
+.sb-links{display:flex;flex-direction:column;gap:8px}
+.sb-link{display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--fg2);transition:color .15s}
+.sb-link:hover{color:var(--acc)}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--acc2);flex-shrink:0}
+.sb-actions{display:flex;flex-direction:column;gap:8px}
+.user-email{font-size:.71rem;color:var(--fg3);text-align:center}
+
+/* ── SEARCH ────────────────────────────────────────────────── */
+.search-wrap{position:relative}
+.search-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--fg3);pointer-events:none}
+.search-inp{width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:99px;padding:7px 12px 7px 32px;font-size:.84rem;color:var(--fg);transition:border-color .2s;outline:none}
+.search-inp:focus{border-color:var(--acc)}
+
+/* ── TAG PILLS ─────────────────────────────────────────────── */
+.tag{display:inline-block;background:var(--acc2);color:var(--acc);font-size:.7rem;padding:3px 9px;border-radius:20px;font-weight:500}
+.tag-btn{display:inline-block;background:none;border:1px solid var(--bdr);color:var(--fg2);font-size:.7rem;padding:3px 9px;border-radius:20px;transition:all .15s;cursor:pointer}
+.tag-btn:hover{background:var(--acc2);color:var(--acc);border-color:var(--acc2)}
+
+/* ── POST LIST ─────────────────────────────────────────────── */
+.post-list{border-top:1px solid var(--bdr)}
+.post-card{padding:26px 0;border-bottom:1px solid var(--bdr);cursor:pointer;transition:transform .12s}
+.post-card:hover{transform:translateX(5px)}
+.post-card:hover .pc-title{color:var(--acc)}
+.pc-row{display:flex;align-items:flex-start;gap:14px}
+.pc-body{flex:1 1 0%;min-width:0}
+.pc-date{font-size:.73rem;color:var(--fg3);letter-spacing:.03em;margin-bottom:7px}
+.pc-title{font-family:&#39;Lora&#39;,serif;font-size:1.15rem;font-weight:600;line-height:1.35;color:var(--fg);margin-bottom:7px;transition:color .12s}
+.pc-excerpt{font-size:.87rem;color:var(--fg2);line-height:1.6;font-weight:400;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.pc-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.post-count{text-align:center;padding:36px 0 0;font-size:.72rem;color:var(--fg3)}
+.search-lbl{font-size:.84rem;color:var(--fg3);margin-bottom:20px}
+
+/* ── SKELETON ──────────────────────────────────────────────── */
+.skel{background:var(--bg2);border-radius:4px;animation:pulse 1.4s ease-in-out infinite}
+.skel-list{border-top:1px solid var(--bdr)}
+.skel-item{padding:26px 0;border-bottom:1px solid var(--bdr)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── EMPTY STATE ───────────────────────────────────────────── */
+.empty{padding:80px 0;text-align:center;color:var(--fg3)}
+.empty-ico{font-size:2.4rem;margin-bottom:12px}
+
+/* ── POST VIEW ─────────────────────────────────────────────── */
+.post-view{padding:40px 0 80px}
+.back-btn{display:inline-flex;align-items:center;gap:5px;font-size:.83rem;color:var(--fg3);margin-bottom:24px;transition:color .15s;cursor:pointer;padding:0;border:none;background:none}
+.back-btn:hover{color:var(--acc)}
+.pv-date{font-size:.73rem;color:var(--fg3);letter-spacing:.03em;margin-bottom:12px}
+.pv-title{font-family:&#39;Lora&#39;,serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:600;line-height:1.25;color:var(--fg);margin-bottom:16px;letter-spacing:-.02em}
+.pv-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.pv-rule{width:40px;height:2px;background:var(--acc);border:none;margin-bottom:32px}
+.pv-body{font-family:&#39;Lora&#39;,serif;font-size:1.05rem;line-height:1.88;color:var(--fg2);word-break:break-word}
+.pv-body span{white-space:pre-wrap}
+.post-img{max-width:100%;border-radius:8px;margin:16px 0}
+/* ── IMAGE GRID (Facebook-style) ─────────────────────── */
+.img-grid{display:grid;gap:3px;border-radius:10px;overflow:hidden;margin:16px 0}
+.img-grid .gi{overflow:hidden;background:var(--bg2);cursor:pointer}
+.img-grid .gi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.img-grid .gi:hover img{transform:scale(1.04)}
+.gi-more{position:relative}
+.gi-more::after{content:attr(data-more);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:1.6rem;font-weight:700;color:#fff;pointer-events:none}
+.img-grid-1 .gi{max-height:480px}
+.img-grid-2{grid-template-columns:1fr 1fr}
+.img-grid-2 .gi{height:280px}
+.img-grid-3{grid-template-columns:1fr 1fr;grid-template-rows:150px 150px}
+.img-grid-3 .gi:first-child{grid-row:1/3}
+.img-grid-4{grid-template-columns:1fr 1fr;grid-template-rows:220px 220px}
+.img-grid-5{grid-template-columns:repeat(6,1fr);grid-template-rows:220px 160px}
+.img-grid-5 .gi:nth-child(1){grid-column:1/4}
+.img-grid-5 .gi:nth-child(2){grid-column:4/7}
+.img-grid-5 .gi:nth-child(3){grid-column:1/3}
+.img-grid-5 .gi:nth-child(4){grid-column:3/5}
+.img-grid-5 .gi:nth-child(5){grid-column:5/7}
+.lbx{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center}
+.lbx-img{max-width:90vw;max-height:90vh;border-radius:6px;object-fit:contain;user-select:none}
+.lbx-x{position:fixed;top:14px;right:18px;color:#fff;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border-radius:50%;border:none;transition:background .15s}
+.lbx-x:hover{background:rgba(255,255,255,.22)}
+.lbx-nav{position:fixed;top:50%;transform:translateY(-50%);color:#fff;cursor:pointer;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:none;transition:background .15s;font-size:1.2rem}
+.lbx-nav:hover{background:rgba(255,255,255,.25)}
+.lbx-prev{left:14px}
+.lbx-next{right:14px}
+.lbx-ctr{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-size:.82rem}
+.pv-actions{display:flex;gap:8px;margin-top:48px;padding-top:22px;border-top:1px solid var(--bdr)}
+
+/* ── WRITE VIEW ────────────────────────────────────────────── */
+.wr-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.wr-label{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em}
+.wr-save{font-size:.74rem;color:var(--fg3)}
+.wr-title{width:100%;font-family:&#39;Lora&#39;,serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:600;color:var(--fg);letter-spacing:-.02em;line-height:1.3;resize:none;overflow:hidden;display:block;border-bottom:2px solid var(--bdr);padding-bottom:14px;margin-bottom:14px;transition:border-color .2s}
+.wr-title:focus{border-color:var(--acc)}
+.wr-tags{width:100%;font-size:.84rem;color:var(--fg2);border-bottom:1px solid var(--bdr);padding:7px 0 11px;margin-bottom:20px;display:block;transition:border-color .2s}
+.wr-tags:focus{border-color:var(--acc)}
+.wr-content{width:100%;min-height:400px;font-family:&#39;Lora&#39;,serif;font-size:1.05rem;line-height:1.88;color:var(--fg2);resize:none;display:block}
+.write-footer{position:fixed;bottom:0;left:0;right:0;background:var(--hdr);backdrop-filter:blur(10px);border-top:1px solid var(--bdr);padding:11px 16px;display:flex;justify-content:flex-end;gap:8px;z-index:50}
+
+/* ── IMAGE TOOLBAR ─────────────────────────────────────────── */
+.img-toolbar{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:20px}
+.img-tb-hdr{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr)}
+.img-tb-body{padding:8px 12px}
+.img-tb-lbl{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em}
+.img-file-label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.img-preview-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.img-preview-item{position:relative;width:76px;height:76px;border-radius:6px;overflow:hidden}
+.img-preview-item img{width:100%;height:100%;object-fit:cover}
+.rm-img{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
+.progress-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--acc);transition:width .3s;border-radius:2px}
+
+/* ── LOGIN ─────────────────────────────────────────────────── */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg)}
+.login-card{width:100%;max-width:340px}
+.login-avatar-wrap{text-align:center;margin-bottom:28px}
+.login-av{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--acc),#7a2e0e);display:flex;align-items:center;justify-content:center}
+.login-av span{color:#fff;font-family:&#39;Lora&#39;,serif;font-size:1.25rem;font-weight:600}
+.login-h{font-family:&#39;Lora&#39;,serif;font-size:1.4rem;font-weight:600;color:var(--fg)}
+.login-sub{font-size:.83rem;color:var(--fg3);margin-top:4px}
+.login-box{background:var(--bg3);border:1px solid var(--bdr);border-radius:16px;padding:26px 22px;box-shadow:0 4px 24px var(--shd)}
+.login-err{font-size:.82rem;color:#ef4444;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:9px 12px;margin-bottom:14px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:.74rem;font-weight:500;color:var(--fg2);margin-bottom:5px}
+.form-input{width:100%;border:1px solid var(--bdr);border-radius:8px;padding:9px 13px;font-size:.9rem;background:var(--bg);color:var(--fg);transition:border-color .2s;outline:none}
+.form-input:focus{border-color:var(--acc)}
+    </style>
+    <script type="module">
+      import { initializeApp }  from &#34;https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js&#34;;
+import { getFirestore, collection, addDoc, doc,
+         updateDoc, deleteDoc, orderBy, query,
+         serverTimestamp, onSnapshot }
+                          from &#34;https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js&#34;;
+import { getAuth, signInWithEmailAndPassword,
+         signOut, onAuthStateChanged }
+                          from &#34;https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js&#34;;
+
+// ════════════════════════════════════════════════
+// 🔧 CẤU HÌNH — chỉnh sửa tại đây
+// ════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            &#34;AIzaSyBiWZSz674nfh3cu12dDPv47YVHI5o5fjg&#34;,
+  authDomain:        &#34;st82-f333b.firebaseapp.com&#34;,
+  projectId:         &#34;st82-f333b&#34;,
+  storageBucket:     &#34;st82-f333b.firebasestorage.app&#34;,
+  messagingSenderId: &#34;136813956513&#34;,
+  appId:             &#34;1:136813956513:web:fd5ea81e019274f0d08fe0&#34;
+};
+
+const IMGBB_API_KEY = &#34;0f011b149aaca94b0280a6fb49e6f501&#34;; // ← API key ImgBB
+
+const PROFILE = {
+  name:     &#34;SỸ TRẦN&#34;,
+  tagline:  &#34;vài câu chuyện thường ngày.&#34;,
+  avatar:   &#34;./media/avatar.jpg&#34;,       // URL ảnh — để trống = dùng chữ viết tắt
+  initials: &#34;ST&#34;,
+  links:    [
+     { label:&#34;Facebook&#34;, url:&#34;https://www.facebook.com/share/14RDNUiZKQA/&#34; },
+     { label:&#34;Email&#34;,    url:&#34;mailto:hiept6736@gmail.com&#34;    },
+  ]
+};
+// ════════════════════════════════════════════════
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+const col  = collection(db, &#34;posts&#34;);
+
+// ── STATE ────────────────────────────────────────
+let posts       = [];
+let postsLoaded = false;
+let currentUser = null;
+let view        = &#34;home&#34;;
+let activeId    = null;
+let editId      = null;
+let draft       = { title:&#34;&#34;, content:&#34;&#34;, tags:&#34;&#34;, images:[] };
+let autoTimer   = null;
+let searchQuery = &#34;&#34;;
+let lbxUrls = [], lbxIdx = 0;
+
+function openLightbox(urls, idx) { lbxUrls = urls; lbxIdx = idx; showLightbox(); }
+function showLightbox() {
+  document.getElementById(&#34;lbx-el&#34;)?.remove();
+  const el = document.createElement(&#34;div&#34;);
+  el.id = &#34;lbx-el&#34;; el.className = &#34;lbx&#34;;
+  const nav = lbxUrls.length &gt; 1;
+  el.innerHTML =
+    &#34;&lt;button class=&#39;lbx-x&#39; id=&#39;lbx-close&#39;&gt;✕&lt;/button&gt;&#34;
+    + (nav ? &#34;&lt;button class=&#39;lbx-nav lbx-prev&#39; id=&#39;lbx-prev&#39;&gt;&#8249;&lt;/button&gt;&#34; : &#34;&#34;)
+    + &#34;&lt;img class=&#39;lbx-img&#39; src=&#39;&#34; + esc(lbxUrls[lbxIdx]) + &#34;&#39; alt=&#39;&#39;/&gt;&#34;
+    + (nav ? &#34;&lt;button class=&#39;lbx-nav lbx-next&#39; id=&#39;lbx-next&#39;&gt;&#8250;&lt;/button&gt;&#34; : &#34;&#34;)
+    + (nav ? &#34;&lt;div class=&#39;lbx-ctr&#39;&gt;&#34; + (lbxIdx+1) + &#34; / &#34; + lbxUrls.length + &#34;&lt;/div&gt;&#34; : &#34;&#34;);
+  document.body.appendChild(el);
+  document.getElementById(&#34;lbx-close&#34;).onclick = closeLightbox;
+  document.getElementById(&#34;lbx-prev&#34;)?.addEventListener(&#34;click&#34;, () =&gt; lightboxNav(-1));
+  document.getElementById(&#34;lbx-next&#34;)?.addEventListener(&#34;click&#34;, () =&gt; lightboxNav(1));
+  el.addEventListener(&#34;click&#34;, e =&gt; { if (e.target === el) closeLightbox(); });
+}
+function closeLightbox() { document.getElementById(&#34;lbx-el&#34;)?.remove(); }
+function lightboxNav(d) { lbxIdx = (lbxIdx + d + lbxUrls.length) % lbxUrls.length; showLightbox(); }
+document.addEventListener(&#34;keydown&#34;, e =&gt; {
+  if (!document.getElementById(&#34;lbx-el&#34;)) return;
+  if (e.key === &#34;Escape&#34;) closeLightbox();
+  if (e.key === &#34;ArrowLeft&#34;) lightboxNav(-1);
+  if (e.key === &#34;ArrowRight&#34;) lightboxNav(1);
+});
+
+// ── DARK MODE ────────────────────────────────────
+const isDark  = () =&gt; document.documentElement.classList.contains(&#34;dark&#34;);
+function toggleTheme() {
+  const d = !isDark();
+  document.documentElement.classList.toggle(&#34;dark&#34;, d);
+  localStorage.setItem(&#34;theme&#34;, d ? &#34;dark&#34; : &#34;light&#34;);
+  render();
+}
+
+// ── AUTH ─────────────────────────────────────────
+onAuthStateChanged(auth, user =&gt; { currentUser = user; render(); });
+
+// ── FIRESTORE — realtime ─────────────────────────
+onSnapshot(query(col, orderBy(&#34;createdAt&#34;,&#34;desc&#34;)), snap =&gt; {
+  posts = snap.docs.map(d =&gt; ({ id:d.id, ...d.data() }));
+  postsLoaded = true;
+  render();
+}, err =&gt; {
+  postsLoaded = true;
+  if (err.code === &#34;permission-denied&#34;)
+    alert(&#34;Firestore Rules chưa cấu hình. Vui lòng kiểm tra lại.&#34;);
+  render();
+});
+
+// ── CRUD ─────────────────────────────────────────
+async function savePost() {
+  const ts   = serverTimestamp();
+  const data = { title:draft.title, content:draft.content,
+                 tags:draft.tags, images:draft.images||[], updatedAt:ts };
+  if (editId) await updateDoc(doc(db,&#34;posts&#34;,editId), data);
+  else        await addDoc(col, { ...data, createdAt:ts });
+  localStorage.removeItem(&#34;blog_draft&#34;);
+  draft  = { title:&#34;&#34;, content:&#34;&#34;, tags:&#34;&#34;, images:[] };
+  editId = null;
+  setView(&#34;home&#34;);
+}
+
+async function deletePost(id) {
+  await deleteDoc(doc(db,&#34;posts&#34;,id));
+  if (view===&#34;post&#34;) setView(&#34;home&#34;); else render();
+}
+
+// ── IMAGE UPLOAD (ImgBB) ─────────────────────────
+function uploadImage(file) {
+  return new Promise((resolve, reject) =&gt; {
+    const reader = new FileReader();
+    reader.onload = async () =&gt; {
+      try {
+        const bar  = document.getElementById(&#34;prog-fill&#34;);
+        const wrap = document.getElementById(&#34;prog-bar&#34;);
+        if (wrap) wrap.style.display = &#34;block&#34;;
+        if (bar)  bar.style.width    = &#34;40%&#34;;
+
+        const fd = new FormData();
+        fd.append(&#34;key&#34;,   IMGBB_API_KEY);
+        fd.append(&#34;image&#34;, reader.result.split(&#34;,&#34;)[1]);
+
+        const res  = await fetch(&#34;https://api.imgbb.com/1/upload&#34;, { method:&#34;POST&#34;, body:fd });
+        const data = await res.json();
+
+        if (bar) bar.style.width = &#34;100%&#34;;
+        setTimeout(() =&gt; {
+          if (wrap) wrap.style.display = &#34;none&#34;;
+          if (bar)  bar.style.width    = &#34;0%&#34;;
+        }, 400);
+
+        if (data.success) resolve(data.data.url);
+        else reject(new Error(data.error?.message || &#34;Upload thất bại&#34;));
+      } catch(e) { reject(e); }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImages(files) {
+  const st = document.getElementById(&#34;upload-status&#34;);
+  if (st) st.textContent = &#34;Đang tải ảnh…&#34;;
+  try {
+    for (const f of files) {
+      if (!f.type.startsWith(&#34;image/&#34;)) continue;
+      const url = await uploadImage(f);
+      draft.images = [...(draft.images||[]), url];
+      const ta  = document.getElementById(&#34;inp-content&#34;);
+      if (ta) {
+        const mk  = `\n@@IMG:${url}@@\n`;
+        const pos = ta.selectionStart ?? ta.value.length;
+        ta.value  = ta.value.slice(0,pos) + mk + ta.value.slice(pos);
+        draft.content = ta.value;
+      }
+      renderPreviews();
+    }
+    if (st) { st.textContent = &#34;✓ Đã chèn ảnh&#34;; setTimeout(()=&gt;{ if(st) st.textContent=&#34;&#34;; },2000); }
+  } catch(e) { if (st) st.textContent = &#34;Lỗi: &#34; + e.message; }
+}
+
+function renderPreviews() {
+  const g = document.getElementById(&#34;img-preview-grid&#34;);
+  if (!g) return;
+  g.innerHTML = (draft.images||[]).map((u,i) =&gt; `
+    &lt;div class=&#34;img-preview-item&#34;&gt;
+      &lt;img src=&#34;${esc(u)}&#34; alt=&#34;img&#34;/&gt;
+      &lt;button class=&#34;rm-img&#34; data-i=&#34;${i}&#34;&gt;✕&lt;/button&gt;
+    &lt;/div&gt;`).join(&#34;&#34;);
+  g.querySelectorAll(&#34;.rm-img&#34;).forEach(el =&gt; el.addEventListener(&#34;click&#34;, ev =&gt; {
+    ev.stopPropagation();
+    const i   = +el.dataset.i;
+    const url = draft.images[i];
+    draft.images.splice(i,1);
+    const ta = document.getElementById(&#34;inp-content&#34;);
+    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,&#34;&#34;); draft.content = ta.value; }
+    renderPreviews();
+  }));
+}
+
+// ── CONTENT RENDERER ─────────────────────────────
+function renderContent(text) {
+  const parts = (text||&#34;&#34;).split(/(@@IMG:[^@]+@@)/g);
+  const out = []; let imgBuf = [];
+  const flush = () =&gt; { if (!imgBuf.length) return; out.push(renderImgGrid(imgBuf)); imgBuf = []; };
+  for (const p of parts) {
+    const m = p.match(/^@@IMG:(.+)@@$/);
+    if (m) { imgBuf.push(m[1]); } else { flush(); if (p) out.push(&#34;&lt;span&gt;&#34; + esc(p) + &#34;&lt;/span&gt;&#34;); }
+  }
+  flush();
+  return out.join(&#34;&#34;);
+}
+
+function renderImgGrid(urls) {
+  const n = urls.length;
+  const max = Math.min(n, 5), extra = n &gt; 5 ? n - 5 : 0;
+  const cls = [&#34;&#34;,&#34;img-grid-1&#34;,&#34;img-grid-2&#34;,&#34;img-grid-3&#34;,&#34;img-grid-4&#34;,&#34;img-grid-5&#34;][max];
+  const attr = JSON.stringify(urls).replace(/&amp;/g,&#34;&amp;amp;&#34;).replace(/&#34;/g,&#34;&amp;quot;&#34;).replace(/&lt;/g,&#34;&amp;lt;&#34;).replace(/&gt;/g,&#34;&amp;gt;&#34;);
+  const cells = urls.slice(0, max).map((url, i) =&gt; {
+    const last = extra &gt; 0 &amp;&amp; i === max - 1;
+    return &#34;&lt;div class=&#39;gi&#34; + (last ? &#34; gi-more&#39;&#34; : &#34;&#39;&#34;) + &#34; data-idx=&#39;&#34; + i + &#34;&#39;&#34;
+      + (last ? &#34; data-more=&#39;+&#34; + extra + &#34;&#39;&#34; : &#34;&#34;) + &#34;&gt;&lt;img src=&#39;&#34; + esc(url) + &#34;&#39; loading=&#39;lazy&#39; alt=&#39;&#39;/&gt;&lt;/div&gt;&#34;;
+  }).join(&#34;&#34;);
+  return &#34;&lt;div class=&#39;img-grid &#34; + cls + &#34;&#39; data-urls=&#39;&#34; + attr + &#34;&#39;&gt;&#34; + cells + &#34;&lt;/div&gt;&#34;;
+}
+
+// ── AUTH ACTIONS ─────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById(&#34;inp-email&#34;)?.value.trim();
+  const pw    = document.getElementById(&#34;inp-pw&#34;)?.value;
+  if (!email||!pw) { showErr(&#34;Vui lòng nhập đầy đủ.&#34;); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+    setView(&#34;home&#34;);
+  } catch(e) {
+    showErr({ &#34;auth/invalid-credential&#34;:&#34;Email hoặc mật khẩu không đúng.&#34;,
+              &#34;auth/user-not-found&#34;:&#34;Tài khoản không tồn tại.&#34;,
+              &#34;auth/wrong-password&#34;:&#34;Mật khẩu không đúng.&#34;,
+              &#34;auth/invalid-email&#34;:&#34;Email không hợp lệ.&#34;,
+              &#34;auth/too-many-requests&#34;:&#34;Quá nhiều lần thử. Thử lại sau.&#34; }[e.code]
+           || &#34;Đăng nhập thất bại.&#34;);
+  }
+}
+function showErr(msg) {
+  const el = document.getElementById(&#34;login-error&#34;);
+  if (el) { el.textContent = msg; el.style.display = &#34;block&#34;; }
+}
+
+// ── DRAFT ────────────────────────────────────────
+function scheduleSave() {
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() =&gt; {
+    localStorage.setItem(&#34;blog_draft&#34;, JSON.stringify(draft));
+    const s = document.getElementById(&#34;save-status&#34;);
+    if (s) s.innerHTML = `&lt;span style=&#34;color:var(--acc)&#34;&gt;✓ Đã lưu nháp&lt;/span&gt;`;
+  }, 800);
+}
+
+// ── ROUTING ──────────────────────────────────────
+function setView(v, id) {
+  view = v; if (id !== undefined) activeId = id;
+  window.scrollTo(0,0); render();
+}
+
+// ── HELPERS ──────────────────────────────────────
+function fmt(ts) {
+  if (!ts) return &#34;&#34;;
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString(&#34;vi-VN&#34;,{day:&#34;2-digit&#34;,month:&#34;2-digit&#34;,year:&#34;numeric&#34;})
+       + &#34; · &#34; + d.toLocaleTimeString(&#34;vi-VN&#34;,{hour:&#34;2-digit&#34;,minute:&#34;2-digit&#34;});
+}
+function tagList(s) { return (s||&#34;&#34;).split(&#34;,&#34;).map(t=&gt;t.trim()).filter(Boolean); }
+function esc(s) {
+  return String(s||&#34;&#34;).replace(/&amp;/g,&#34;&amp;amp;&#34;).replace(/&lt;/g,&#34;&amp;lt;&#34;)
+                      .replace(/&gt;/g,&#34;&amp;gt;&#34;).replace(/&#34;/g,&#34;&amp;quot;&#34;);
+}
+function filtered() {
+  if (!searchQuery) return posts;
+  const q = searchQuery.toLowerCase();
+  return posts.filter(p =&gt;
+    p.title?.toLowerCase().includes(q) ||
+    p.content?.toLowerCase().includes(q) ||
+    (p.tags||&#34;&#34;).toLowerCase().includes(q));
+}
+
+// ── ICONS ────────────────────────────────────────
+const ICO = {
+  sun:    `&lt;svg width=&#34;15&#34; height=&#34;15&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;circle cx=&#34;12&#34; cy=&#34;12&#34; r=&#34;5&#34;/&gt;&lt;path stroke-linecap=&#34;round&#34; d=&#34;M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;`,
+  moon:   `&lt;svg width=&#34;15&#34; height=&#34;15&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z&#34;/&gt;&lt;/svg&gt;`,
+  edit:   `&lt;svg width=&#34;13&#34; height=&#34;13&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z&#34;/&gt;&lt;/svg&gt;`,
+  trash:  `&lt;svg width=&#34;13&#34; height=&#34;13&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16&#34;/&gt;&lt;/svg&gt;`,
+  write:  `&lt;svg width=&#34;14&#34; height=&#34;14&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z&#34;/&gt;&lt;/svg&gt;`,
+  img:    `&lt;svg width=&#34;13&#34; height=&#34;13&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z&#34;/&gt;&lt;/svg&gt;`,
+  back:   `&lt;svg width=&#34;14&#34; height=&#34;14&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M15 19l-7-7 7-7&#34;/&gt;&lt;/svg&gt;`,
+  search: `&lt;svg width=&#34;14&#34; height=&#34;14&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z&#34;/&gt;&lt;/svg&gt;`,
+  chevr:  `&lt;svg width=&#34;14&#34; height=&#34;14&#34; fill=&#34;none&#34; stroke=&#34;currentColor&#34; viewBox=&#34;0 0 24 24&#34;&gt;&lt;path stroke-linecap=&#34;round&#34; stroke-linejoin=&#34;round&#34; stroke-width=&#34;2&#34; d=&#34;M9 5l7 7-7 7&#34;/&gt;&lt;/svg&gt;`
+};
+
+// ── RENDER ───────────────────────────────────────
+function render() { document.body.innerHTML = shell(mainContent()); bind(); }
+
+function searchBar(id) { return `
+  &lt;div class=&#34;search-wrap&#34;&gt;
+    &lt;span class=&#34;search-ico&#34;&gt;${ICO.search}&lt;/span&gt;
+    &lt;input id=&#34;${id}&#34; class=&#34;search-inp&#34; type=&#34;text&#34;
+      placeholder=&#34;Tìm kiếm bài viết…&#34; value=&#34;${esc(searchQuery)}&#34;/&gt;
+  &lt;/div&gt;`; }
+
+function shell(inner) {
+  if (view === &#34;login&#34;) return tLogin();
+  const isWrite = view===&#34;write&#34;||view===&#34;edit&#34;;
+
+  const thIcon  = isDark() ? ICO.sun  : ICO.moon;
+  const thLabel = isDark() ? &#34;Sáng&#34;   : &#34;Tối&#34;;
+
+  return `
+&lt;!-- ── MOBILE HEADER ── --&gt;
+&lt;header class=&#34;hdr mob&#34;&gt;
+  &lt;div class=&#34;hdr-row&#34;&gt;
+    &lt;button id=&#34;go-home&#34; class=&#34;site-name&#34;&gt;
+      ${esc(PROFILE.name.split(&#34; &#34;).slice(-2).join(&#34; &#34;))}&lt;em&gt;.&lt;/em&gt;
+    &lt;/button&gt;
+    &lt;div class=&#34;hdr-actions&#34;&gt;
+      &lt;button id=&#34;theme-toggle&#34; class=&#34;theme-btn&#34; title=&#34;Chuyển giao diện&#34;&gt;${thIcon}&lt;/button&gt;
+      ${currentUser
+        ? `&lt;button id=&#34;go-write-m&#34; class=&#34;btn btn-p btn-sm&#34;&gt;+ Viết&lt;/button&gt;
+           &lt;button id=&#34;go-logout-m&#34; class=&#34;btn btn-g btn-sm&#34;&gt;Đăng xuất&lt;/button&gt;`
+        : `&lt;button id=&#34;go-login&#34; class=&#34;btn btn-g btn-sm&#34;&gt;Đăng nhập&lt;/button&gt;`}
+    &lt;/div&gt;
+  &lt;/div&gt;
+  ${!isWrite ? `&lt;div class=&#34;mob-search&#34;&gt;${searchBar(&#34;search-m&#34;)}&lt;/div&gt;` : &#34;&#34;}
+&lt;/header&gt;
+
+&lt;!-- ── PAGE ── --&gt;
+&lt;div class=&#34;page&#34;&gt;
+  &lt;div class=&#34;${isWrite ? &#34;&#34; : &#34;page-grid&#34;}&#34;&gt;
+
+    &lt;!-- ── SIDEBAR ── --&gt;
+    ${!isWrite ? `
+    &lt;aside class=&#34;sidebar desk&#34;&gt;
+      &lt;div class=&#34;sidebar-sticky&#34;&gt;
+
+        &lt;div class=&#34;avatar-wrap&#34;&gt;
+          &lt;div class=&#34;avatar&#34;&gt;
+            ${PROFILE.avatar
+              ? `&lt;img src=&#34;${esc(PROFILE.avatar)}&#34; alt=&#34;avatar&#34;/&gt;`
+              : `&lt;span class=&#34;avatar-txt&#34;&gt;${esc(PROFILE.initials)}&lt;/span&gt;`}
+          &lt;/div&gt;
+          &lt;p class=&#34;profile-name&#34;&gt;${esc(PROFILE.name)}&lt;/p&gt;
+          &lt;p class=&#34;profile-bio&#34;&gt;${esc(PROFILE.tagline)}&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;hr class=&#34;sidebar-divider&#34;/&gt;
+
+        &lt;div class=&#34;stat-row&#34;&gt;
+          &lt;div class=&#34;stat-box&#34;&gt;
+            &lt;div class=&#34;stat-n&#34;&gt;${posts.length}&lt;/div&gt;
+            &lt;div class=&#34;stat-l&#34;&gt;Bài viết&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class=&#34;stat-box&#34;&gt;
+            &lt;div class=&#34;stat-n&#34;&gt;${[...new Set(posts.flatMap(p=&gt;tagList(p.tags)))].length}&lt;/div&gt;
+            &lt;div class=&#34;stat-l&#34;&gt;Chủ đề&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        ${searchBar(&#34;search-d&#34;)}
+
+        ${(()=&gt;{
+          const all = [...new Set(posts.flatMap(p=&gt;tagList(p.tags)))];
+          return all.length ? `
+            &lt;div&gt;
+              &lt;div class=&#34;sb-label&#34;&gt;Chủ đề&lt;/div&gt;
+              &lt;div class=&#34;tag-cloud&#34;&gt;
+                ${all.map(t=&gt;`&lt;button class=&#34;tag-btn&#34; data-tag=&#34;${esc(t)}&#34;&gt;${esc(t)}&lt;/button&gt;`).join(&#34;&#34;)}
+              &lt;/div&gt;
+            &lt;/div&gt;` : &#34;&#34;;
+        })()}
+
+        ${PROFILE.links.length ? `
+          &lt;div&gt;
+            &lt;div class=&#34;sb-label&#34;&gt;Liên kết&lt;/div&gt;
+            &lt;div class=&#34;sb-links&#34;&gt;
+              ${PROFILE.links.map(l=&gt;`
+                &lt;a href=&#34;${esc(l.url)}&#34; target=&#34;_blank&#34; class=&#34;sb-link&#34;&gt;
+                  &lt;span class=&#34;sb-dot&#34;&gt;&lt;/span&gt;${esc(l.label)}
+                &lt;/a&gt;`).join(&#34;&#34;)}
+            &lt;/div&gt;
+          &lt;/div&gt;` : &#34;&#34;}
+
+        &lt;hr class=&#34;sidebar-divider&#34;/&gt;
+
+        &lt;div class=&#34;sb-actions&#34;&gt;
+          &lt;button id=&#34;theme-toggle-d&#34; class=&#34;btn btn-g&#34; style=&#34;justify-content:center;gap:6px&#34;&gt;
+            ${thIcon} Chế độ ${thLabel}
+          &lt;/button&gt;
+          ${currentUser ? `
+            &lt;button id=&#34;go-write&#34; class=&#34;btn btn-p&#34; style=&#34;justify-content:center;gap:6px;padding:9px 14px&#34;&gt;
+              ${ICO.write} Viết bài mới
+            &lt;/button&gt;
+            &lt;button id=&#34;go-logout&#34; class=&#34;btn btn-g&#34; style=&#34;justify-content:center&#34;&gt;Đăng xuất&lt;/button&gt;
+            &lt;p class=&#34;user-email&#34;&gt;${esc(currentUser.email)}&lt;/p&gt;`
+          : `&lt;button id=&#34;go-login-side&#34; class=&#34;btn btn-g&#34; style=&#34;justify-content:center&#34;&gt;
+               Đăng nhập quản trị
+             &lt;/button&gt;`}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/aside&gt;` : &#34;&#34;}
+
+    &lt;!-- ── MAIN ── --&gt;
+    &lt;div class=&#34;${isWrite ? &#34;write-col&#34; : &#34;main-col&#34;}&#34;&gt;${inner}&lt;/div&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+${isWrite ? `
+&lt;div class=&#34;write-footer&#34;&gt;
+  &lt;button id=&#34;cancel-write&#34; class=&#34;btn btn-g&#34;&gt;Huỷ&lt;/button&gt;
+  &lt;button id=&#34;publish-btn&#34;  class=&#34;btn btn-p&#34;&gt;${editId?&#34;Lưu thay đổi&#34;:&#34;Đăng bài&#34;}&lt;/button&gt;
+&lt;/div&gt;` : &#34;&#34;}`;
+}
+
+function mainContent() {
+  if (view===&#34;write&#34;||view===&#34;edit&#34;) return tWrite();
+  if (view===&#34;post&#34;) return tPost();
+  return tHome();
+}
+
+// ── HOME ─────────────────────────────────────────
+function tHome() {
+  if (!postsLoaded) return `
+    &lt;div class=&#34;skel-list&#34;&gt;
+      ${[1,2,3].map(()=&gt;`
+        &lt;div class=&#34;skel-item&#34;&gt;
+          &lt;div class=&#34;skel&#34; style=&#34;height:12px;width:120px;margin-bottom:10px&#34;&gt;&lt;/div&gt;
+          &lt;div class=&#34;skel&#34; style=&#34;height:18px;width:70%;margin-bottom:8px&#34;&gt;&lt;/div&gt;
+          &lt;div class=&#34;skel&#34; style=&#34;height:13px;width:100%;margin-bottom:5px&#34;&gt;&lt;/div&gt;
+          &lt;div class=&#34;skel&#34; style=&#34;height:13px;width:80%&#34;&gt;&lt;/div&gt;
+        &lt;/div&gt;`).join(&#34;&#34;)}
+    &lt;/div&gt;`;
+
+  const list = filtered();
+
+  if (searchQuery &amp;&amp; !list.length) return `
+    &lt;div class=&#34;empty&#34;&gt;
+      &lt;div class=&#34;empty-ico&#34;&gt;🔍&lt;/div&gt;
+      &lt;p style=&#34;font-size:.88rem&#34;&gt;Không tìm thấy &#34;&lt;strong&gt;${esc(searchQuery)}&lt;/strong&gt;&#34;&lt;/p&gt;
+      &lt;button id=&#34;clear-search&#34; class=&#34;btn btn-g btn-sm&#34; style=&#34;margin-top:14px&#34;&gt;Xoá tìm kiếm&lt;/button&gt;
+    &lt;/div&gt;`;
+
+  if (!list.length) return `
+    &lt;div class=&#34;empty&#34;&gt;
+      &lt;div class=&#34;empty-ico&#34;&gt;✍️&lt;/div&gt;
+      &lt;p style=&#34;font-size:.88rem&#34;&gt;Chưa có bài viết nào.&lt;/p&gt;
+    &lt;/div&gt;`;
+
+  return `
+    ${searchQuery ? `&lt;p class=&#34;search-lbl&#34;&gt;Kết quả: &lt;strong style=&#34;color:var(--fg)&#34;&gt;${esc(searchQuery)}&lt;/strong&gt; — ${list.length} bài&lt;/p&gt;` : &#34;&#34;}
+    &lt;div class=&#34;post-list&#34;&gt;
+      ${list.map(p =&gt; {
+        const thumb = (p.images||[]).find(Boolean);
+        return `
+        &lt;article class=&#34;post-card&#34; data-id=&#34;${esc(p.id)}&#34;&gt;
+          &lt;div class=&#34;pc-row&#34;&gt;
+            &lt;div class=&#34;pc-body&#34;&gt;
+              &lt;div class=&#34;pc-date&#34;&gt;${esc(fmt(p.createdAt))}&lt;/div&gt;
+              &lt;h2 class=&#34;pc-title&#34;&gt;${esc(p.title)}&lt;/h2&gt;
+              &lt;p class=&#34;pc-excerpt&#34;&gt;${esc((p.content||&#34;&#34;).replace(/@@IMG:[^@]+@@/g,&#34;&#34;).slice(0,180))}&lt;/p&gt;
+              ${tagList(p.tags).length ? `
+                &lt;div class=&#34;pc-tags&#34;&gt;
+                  ${tagList(p.tags).map(t=&gt;`&lt;span class=&#34;tag&#34;&gt;${esc(t)}&lt;/span&gt;`).join(&#34;&#34;)}
+                &lt;/div&gt;` : &#34;&#34;}
+            &lt;/div&gt;
+            ${thumb ? `&lt;img src=&#34;${esc(thumb)}&#34; class=&#34;pc-thumb&#34; loading=&#34;lazy&#34; alt=&#34;&#34;/&gt;` : &#34;&#34;}
+          &lt;/div&gt;
+        &lt;/article&gt;`;}).join(&#34;&#34;)}
+    &lt;/div&gt;
+    &lt;div class=&#34;post-count&#34;&gt;${posts.length} bài viết&lt;/div&gt;`;
+}
+
+// ── POST VIEW ─────────────────────────────────────
+function tPost() {
+  const p = posts.find(x=&gt;x.id===activeId);
+  if (!p) return tHome();
+  return `
+    &lt;div class=&#34;post-view&#34;&gt;
+      &lt;button id=&#34;go-back&#34; class=&#34;back-btn&#34;&gt;${ICO.back} Trang chủ&lt;/button&gt;
+      &lt;div class=&#34;pv-date&#34;&gt;${esc(fmt(p.createdAt))}&lt;/div&gt;
+      &lt;h1 class=&#34;pv-title&#34;&gt;${esc(p.title)}&lt;/h1&gt;
+      ${tagList(p.tags).length ? `
+        &lt;div class=&#34;pv-tags&#34;&gt;${tagList(p.tags).map(t=&gt;`&lt;span class=&#34;tag&#34;&gt;${esc(t)}&lt;/span&gt;`).join(&#34;&#34;)}&lt;/div&gt;` : &#34;&#34;}
+      &lt;hr class=&#34;pv-rule&#34;/&gt;
+      &lt;div class=&#34;pv-body&#34;&gt;${renderContent(p.content)}&lt;/div&gt;
+      ${currentUser ? `
+        &lt;div class=&#34;pv-actions&#34;&gt;
+          &lt;button id=&#34;go-edit&#34; data-id=&#34;${esc(p.id)}&#34; class=&#34;btn btn-g&#34;&gt;${ICO.edit} Chỉnh sửa&lt;/button&gt;
+          &lt;button id=&#34;go-delete&#34; data-id=&#34;${esc(p.id)}&#34; class=&#34;btn btn-danger&#34;&gt;${ICO.trash} Xoá bài&lt;/button&gt;
+        &lt;/div&gt;` : &#34;&#34;}
+    &lt;/div&gt;`;
+}
+
+// ── WRITE ─────────────────────────────────────────
+function tWrite() {
+  return `
+    &lt;div class=&#34;wr-topbar&#34;&gt;
+      &lt;span class=&#34;wr-label&#34;&gt;${editId?&#34;Chỉnh sửa bài&#34;:&#34;Bài viết mới&#34;}&lt;/span&gt;
+      &lt;span id=&#34;save-status&#34; class=&#34;wr-save&#34;&gt;&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;textarea id=&#34;inp-title&#34; class=&#34;wr-title&#34; rows=&#34;1&#34;
+      placeholder=&#34;Tiêu đề bài viết…&#34;&gt;${esc(draft.title)}&lt;/textarea&gt;
+
+    &lt;input id=&#34;inp-tags&#34; class=&#34;wr-tags&#34; type=&#34;text&#34;
+      placeholder=&#34;Thẻ tag (phẩy ngăn cách): y học, tim mạch…&#34;
+      value=&#34;${esc(draft.tags)}&#34;/&gt;
+
+    &lt;div class=&#34;img-toolbar&#34;&gt;
+      &lt;div class=&#34;img-tb-hdr&#34;&gt;
+        &lt;span class=&#34;img-tb-lbl&#34;&gt;Chèn ảnh&lt;/span&gt;
+        &lt;label class=&#34;img-file-label btn btn-g btn-sm&#34;&gt;
+          ${ICO.img} Chọn ảnh
+          &lt;input id=&#34;img-file-input&#34; type=&#34;file&#34; accept=&#34;image/*&#34; multiple style=&#34;display:none&#34;/&gt;
+        &lt;/label&gt;
+        &lt;span id=&#34;upload-status&#34; style=&#34;font-size:.75rem;color:var(--fg3)&#34;&gt;&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&#34;img-tb-body&#34;&gt;
+        &lt;div class=&#34;progress-bar&#34; id=&#34;prog-bar&#34; style=&#34;display:none&#34;&gt;
+          &lt;div class=&#34;progress-fill&#34; id=&#34;prog-fill&#34; style=&#34;width:0%&#34;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&#34;img-preview-grid&#34; id=&#34;img-preview-grid&#34;&gt;
+          ${(draft.images||[]).map((u,i)=&gt;`
+            &lt;div class=&#34;img-preview-item&#34;&gt;
+              &lt;img src=&#34;${esc(u)}&#34; alt=&#34;img&#34;/&gt;
+              &lt;button class=&#34;rm-img&#34; data-i=&#34;${i}&#34;&gt;✕&lt;/button&gt;
+            &lt;/div&gt;`).join(&#34;&#34;)}
+        &lt;/div&gt;
+        ${!(draft.images||[]).length
+          ? `&lt;p style=&#34;font-size:.75rem;color:var(--fg3)&#34;&gt;Ảnh sẽ chèn vào vị trí con trỏ trong nội dung&lt;/p&gt;` : &#34;&#34;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;textarea id=&#34;inp-content&#34; class=&#34;wr-content&#34;
+      placeholder=&#34;Bắt đầu viết nội dung của bạn…&amp;#10;&amp;#10;Tự động lưu nháp mỗi lúc bạn gõ.&#34;
+    &gt;${esc(draft.content)}&lt;/textarea&gt;`;
+}
+
+// ── LOGIN ─────────────────────────────────────────
+function tLogin() {
+  return `
+    &lt;div class=&#34;login-page&#34;&gt;
+      &lt;div class=&#34;login-card&#34;&gt;
+        &lt;div class=&#34;login-avatar-wrap&#34;&gt;
+          &lt;div class=&#34;login-av&#34;&gt;
+            &lt;span&gt;${esc(PROFILE.initials)}&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;h1 class=&#34;login-h&#34;&gt;Đăng nhập&lt;/h1&gt;
+          &lt;p class=&#34;login-sub&#34;&gt;Tài khoản quản trị viên&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class=&#34;login-box&#34;&gt;
+          &lt;div id=&#34;login-error&#34; class=&#34;login-err&#34; style=&#34;display:none&#34;&gt;&lt;/div&gt;
+          &lt;div class=&#34;form-group&#34;&gt;
+            &lt;label class=&#34;form-label&#34;&gt;Email&lt;/label&gt;
+            &lt;input id=&#34;inp-email&#34; class=&#34;form-input&#34; type=&#34;email&#34;
+              autocomplete=&#34;email&#34; placeholder=&#34;admin@example.com&#34;/&gt;
+          &lt;/div&gt;
+          &lt;div class=&#34;form-group&#34;&gt;
+            &lt;label class=&#34;form-label&#34;&gt;Mật khẩu&lt;/label&gt;
+            &lt;input id=&#34;inp-pw&#34; class=&#34;form-input&#34; type=&#34;password&#34;
+              autocomplete=&#34;current-password&#34; placeholder=&#34;••••••••&#34;/&gt;
+          &lt;/div&gt;
+          &lt;button id=&#34;login-btn&#34; class=&#34;btn btn-p btn-full&#34; style=&#34;margin-top:8px&#34;&gt;Đăng nhập&lt;/button&gt;
+          &lt;button id=&#34;back-from-login&#34; class=&#34;btn btn-g btn-full&#34; style=&#34;margin-top:8px&#34;&gt;← Quay lại&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;`;
+}
+
+// ── BIND ──────────────────────────────────────────
+function bind() {
+  const on = (id, ev, fn) =&gt; document.getElementById(id)?.addEventListener(ev, fn);
+
+  on(&#34;go-home&#34;,         &#34;click&#34;, () =&gt; { searchQuery=&#34;&#34;; setView(&#34;home&#34;); });
+  on(&#34;go-back&#34;,         &#34;click&#34;, () =&gt; setView(&#34;home&#34;));
+  on(&#34;go-login&#34;,        &#34;click&#34;, () =&gt; setView(&#34;login&#34;));
+  on(&#34;go-login-side&#34;,   &#34;click&#34;, () =&gt; setView(&#34;login&#34;));
+  on(&#34;back-from-login&#34;, &#34;click&#34;, () =&gt; setView(&#34;home&#34;));
+  on(&#34;go-logout&#34;,       &#34;click&#34;, () =&gt; { signOut(auth); setView(&#34;home&#34;); });
+  on(&#34;go-logout-m&#34;,     &#34;click&#34;, () =&gt; { signOut(auth); setView(&#34;home&#34;); });
+  on(&#34;clear-search&#34;,    &#34;click&#34;, () =&gt; { searchQuery=&#34;&#34;; render(); });
+  on(&#34;theme-toggle&#34;,    &#34;click&#34;, toggleTheme);
+  on(&#34;theme-toggle-d&#34;,  &#34;click&#34;, toggleTheme);
+
+  const openWrite = () =&gt; {
+    const s = localStorage.getItem(&#34;blog_draft&#34;);
+    draft   = s ? JSON.parse(s) : { title:&#34;&#34;, content:&#34;&#34;, tags:&#34;&#34;, images:[] };
+    if (!draft.images) draft.images = [];
+    editId  = null;
+    setView(&#34;write&#34;);
+  };
+  on(&#34;go-write&#34;,   &#34;click&#34;, openWrite);
+  on(&#34;go-write-m&#34;, &#34;click&#34;, openWrite);
+
+  // Search
+  [&#34;search-d&#34;,&#34;search-m&#34;].forEach(id =&gt; {
+    document.getElementById(id)?.addEventListener(&#34;input&#34;, e =&gt; {
+      searchQuery = e.target.value;
+      const list  = filtered();
+      // Re-render chỉ vùng post list thay vì toàn trang
+      const main  = document.querySelector(&#34;.main-col&#34;);
+      if (main) { main.innerHTML = tHome(); bindList(); }
+      setTimeout(() =&gt; document.getElementById(id)?.focus(), 5);
+    });
+  });
+
+  // Tag filter
+  document.querySelectorAll(&#34;.tag-btn&#34;).forEach(el =&gt;
+    el.addEventListener(&#34;click&#34;, () =&gt; { searchQuery = el.dataset.tag; render(); }));
+
+  bindList();
+
+  // Grid lightbox click
+  document.querySelectorAll(&#34;.img-grid&#34;).forEach(grid =&gt; {
+    grid.querySelectorAll(&#34;.gi&#34;).forEach(gi =&gt; {
+      gi.addEventListener(&#34;click&#34;, () =&gt; {
+        try {
+          const urls = JSON.parse(grid.getAttribute(&#34;data-urls&#34;));
+          openLightbox(urls, +gi.dataset.idx);
+        } catch(e) {}
+      });
+    });
+  });
+
+  // Write
+  on(&#34;cancel-write&#34;,&#34;click&#34;, () =&gt; { setView(&#34;home&#34;); editId=null; });
+  on(&#34;publish-btn&#34;, &#34;click&#34;, async () =&gt; {
+    const t = document.getElementById(&#34;inp-title&#34;)?.value.trim();
+    const c = document.getElementById(&#34;inp-content&#34;)?.value.trim();
+    if (!t||!c) { alert(&#34;Vui lòng nhập tiêu đề và nội dung.&#34;); return; }
+    draft.title   = t; draft.content = c;
+    draft.tags    = document.getElementById(&#34;inp-tags&#34;)?.value||&#34;&#34;;
+    const btn = document.getElementById(&#34;publish-btn&#34;);
+    if (btn) { btn.disabled=true; btn.textContent=&#34;Đang lưu…&#34;; }
+    try { await savePost(); }
+    catch(e) { alert(&#34;Lỗi: &#34;+e.message); if(btn){btn.disabled=false; btn.textContent=editId?&#34;Lưu thay đổi&#34;:&#34;Đăng bài&#34;;} }
+  });
+
+  on(&#34;img-file-input&#34;,&#34;change&#34;, async e =&gt; {
+    if (e.target.files?.length) await handleImages(Array.from(e.target.files));
+  });
+
+  document.querySelectorAll(&#34;.rm-img&#34;).forEach(el =&gt; el.addEventListener(&#34;click&#34;, ev =&gt; {
+    ev.stopPropagation();
+    const i   = +el.dataset.i;
+    const url = draft.images[i];
+    draft.images.splice(i,1);
+    const ta = document.getElementById(&#34;inp-content&#34;);
+    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,&#34;&#34;); draft.content=ta.value; }
+    renderPreviews();
+  }));
+
+  [&#34;inp-title&#34;,&#34;inp-content&#34;,&#34;inp-tags&#34;].forEach(id =&gt; {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener(&#34;input&#34;, () =&gt; {
+      draft.title   = document.getElementById(&#34;inp-title&#34;)?.value   ?? draft.title;
+      draft.content = document.getElementById(&#34;inp-content&#34;)?.value ?? draft.content;
+      draft.tags    = document.getElementById(&#34;inp-tags&#34;)?.value    ?? draft.tags;
+      scheduleSave();
+    });
+    if (id===&#34;inp-title&#34;) {
+      el.style.height = &#34;auto&#34;; el.style.height = el.scrollHeight+&#34;px&#34;;
+      el.addEventListener(&#34;input&#34;,()=&gt;{el.style.height=&#34;auto&#34;; el.style.height=el.scrollHeight+&#34;px&#34;;});
+    }
+  });
+
+  on(&#34;login-btn&#34;,&#34;click&#34;, doLogin);
+  on(&#34;inp-pw&#34;,&#34;keydown&#34;, e =&gt; { if(e.key===&#34;Enter&#34;) doLogin(); });
+  setTimeout(() =&gt; {
+    document.getElementById(&#34;inp-email&#34;)?.focus();
+    document.getElementById(&#34;inp-title&#34;)?.focus();
+  }, 20);
+}
+
+function bindList() {
+  document.querySelectorAll(&#34;.post-card&#34;).forEach(el =&gt;
+    el.addEventListener(&#34;click&#34;, () =&gt; setView(&#34;post&#34;, el.dataset.id)));
+
+  const on = (id, ev, fn) =&gt; document.getElementById(id)?.addEventListener(ev, fn);
+  on(&#34;go-edit&#34;, &#34;click&#34;, e =&gt; {
+    const p = posts.find(x=&gt;x.id===e.currentTarget.dataset.id);
+    if (p) { draft={title:p.title,content:p.content,tags:p.tags||&#34;&#34;,images:p.images||[]}; editId=p.id; setView(&#34;edit&#34;); }
+  });
+  on(&#34;go-delete&#34;,&#34;click&#34;, e =&gt; {
+    if (confirm(&#34;Xoá bài viết này? Không thể hoàn tác.&#34;)) deletePost(e.currentTarget.dataset.id);
+  });
+}
+    </script>
+  </head>
+  <body>
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--fg3);font-size:.9rem">
+      Đang kết nối…
+    </div>
+  </body>
+</html>
