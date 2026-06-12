@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>một chút nghịch ngợm...</title>
+<title>một tí chuyện mỏng...</title>
+
 
  <meta property="og:title" content="ST82">
 <meta property="og:description" content="một góc để tôi kể chuyện đời thường">
@@ -11,6 +12,8 @@
 <meta property="og:url" content="https://sykoi82.github.io">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/png" href="media/Logo.png">
+
+
 
 <!-- ① Preconnect: kết nối song song trước khi tải -->
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
@@ -187,7 +190,7 @@ img{max-width:100%;display:block}
 
 /* ── IMAGE TOOLBAR ─────────────────────────────────────────── */
 .img-toolbar{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:20px}
-.img-tb-hdr{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr)}
+.img-tb-hdr{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr)}
 .img-tb-body{padding:8px 12px}
 .img-tb-lbl{font-size:.69rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em}
 .img-file-label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
@@ -197,6 +200,18 @@ img{max-width:100%;display:block}
 .rm-img{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
 .progress-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:var(--acc);transition:width .3s;border-radius:2px}
+
+/* ── IMAGE GRID (khi đọc bài) ──────────────────────────────── */
+.img-grid{display:grid;gap:3px;border-radius:10px;overflow:hidden;margin:16px 0}
+.img-grid-1{grid-template-columns:1fr}
+.img-grid-2{grid-template-columns:1fr 1fr}
+.img-grid-3{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+.img-grid-3 .gi:first-child{grid-column:1/-1}
+.img-grid-4{grid-template-columns:1fr 1fr}
+.gi{overflow:hidden;aspect-ratio:1/1;background:var(--bg2)}
+.img-grid-1 .gi{aspect-ratio:16/9}
+.gi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.gi img:hover{transform:scale(1.03)}
 
 /* ── LOGIN ─────────────────────────────────────────────────── */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg)}
@@ -240,11 +255,11 @@ const IMGBB_API_KEY = "0f011b149aaca94b0280a6fb49e6f501"; // ← API key ImgBB
 
 const PROFILE = {
   name:     "SỸ TRẦN",
-  tagline:  "vài câu chuyện thường ngày.",
-  avatar:   "./media/avatar.jpg",       // URL ảnh — để trống = dùng chữ viết tắt
+  tagline:  "kể chuyện chưa từng kể",
+  avatar:   "./media/avatar.jpg",
   initials: "ST",
   links:    [
-     { label:"Facebook", url:"https://www.facebook.com/share/14RDNUiZKQA/" },
+     { label:"Facebook", url:"https://www.facebook.com/share/1a3GjaQYey/" },
      { label:"Email",    url:"mailto:hiept6736@gmail.com"    },
   ]
 };
@@ -341,6 +356,7 @@ function uploadImage(file) {
   });
 }
 
+// ── ẢNH ĐƠN ─────────────────────────────────────
 async function handleImages(files) {
   const st = document.getElementById("upload-status");
   if (st) st.textContent = "Đang tải ảnh…";
@@ -351,42 +367,96 @@ async function handleImages(files) {
       draft.images = [...(draft.images||[]), url];
       const ta  = document.getElementById("inp-content");
       if (ta) {
-        const mk  = `\n@@IMG:${url}@@\n`;
-        const pos = ta.selectionStart ?? ta.value.length;
+        const mk  = "\n@@IMG:" + url + "@@\n";
+        const pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
         ta.value  = ta.value.slice(0,pos) + mk + ta.value.slice(pos);
         draft.content = ta.value;
       }
       renderPreviews();
     }
-    if (st) { st.textContent = "✓ Đã chèn ảnh"; setTimeout(()=>{ if(st) st.textContent=""; },2000); }
+    if (st) { st.textContent = "✓ Đã chèn ảnh"; setTimeout(function(){ if(st) st.textContent=""; },2000); }
   } catch(e) { if (st) st.textContent = "Lỗi: " + e.message; }
 }
 
+// ── LƯỚI ẢNH (2–4 ảnh) ──────────────────────────
+async function handleGridImages(files) {
+  const st = document.getElementById("upload-status");
+  const imgFiles = Array.from(files).filter(f => f.type.startsWith("image/"));
+  if (!imgFiles.length) return;
+  if (imgFiles.length < 2) { alert("Lưới ảnh cần chọn ít nhất 2 ảnh."); return; }
+  if (imgFiles.length > 4) { alert("Tối đa 4 ảnh mỗi lưới."); return; }
+  if (st) st.textContent = "Đang tải " + imgFiles.length + " ảnh…";
+  try {
+    const urls = [];
+    for (const f of imgFiles) {
+      const url = await uploadImage(f);
+      urls.push(url);
+      draft.images = [...(draft.images||[]), url];
+      if (st) st.textContent = "Đã tải " + urls.length + "/" + imgFiles.length + "…";
+    }
+    const marker = "\n@@GRID:" + urls.join("||") + "@@\n";
+    const ta = document.getElementById("inp-content");
+    if (ta) {
+      const pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+      ta.value  = ta.value.slice(0, pos) + marker + ta.value.slice(pos);
+      draft.content = ta.value;
+    }
+    renderPreviews();
+    if (st) { st.textContent = "✓ Đã chèn lưới " + urls.length + " ảnh"; setTimeout(function(){ if(st) st.textContent=""; },2500); }
+  } catch(e) { if (st) st.textContent = "Lỗi: " + e.message; }
+}
+
+// ── PREVIEW TOOLBAR ──────────────────────────────
 function renderPreviews() {
   const g = document.getElementById("img-preview-grid");
   if (!g) return;
-  g.innerHTML = (draft.images||[]).map((u,i) => `
-    <div class="img-preview-item">
-      <img src="${esc(u)}" alt="img"/>
-      <button class="rm-img" data-i="${i}">✕</button>
-    </div>`).join("");
-  g.querySelectorAll(".rm-img").forEach(el => el.addEventListener("click", ev => {
-    ev.stopPropagation();
-    const i   = +el.dataset.i;
-    const url = draft.images[i];
-    draft.images.splice(i,1);
-    const ta = document.getElementById("inp-content");
-    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,""); draft.content = ta.value; }
-    renderPreviews();
-  }));
+  g.innerHTML = (draft.images||[]).map(function(u,i) {
+    return '<div class="img-preview-item">'
+         + '<img src="' + esc(u) + '" alt="img"/>'
+         + '<button class="rm-img" data-i="' + i + '">✕</button>'
+         + '</div>';
+  }).join("");
+  g.querySelectorAll(".rm-img").forEach(function(el) {
+    el.addEventListener("click", function(ev) {
+      ev.stopPropagation();
+      var i   = +el.dataset.i;
+      var url = draft.images[i];
+      draft.images.splice(i, 1);
+      var ta = document.getElementById("inp-content");
+      if (ta) {
+        ta.value = ta.value.replace("\n@@IMG:" + url + "@@\n", "");
+        // Xoá khỏi GRID nếu có
+        ta.value = ta.value.replace(
+          new RegExp("@@GRID:([^@]*)@@", "g"),
+          function(m) {
+            var remaining = m.replace("@@GRID:","").replace("@@","").split("||").filter(function(u2){ return u2 !== url; });
+            if (remaining.length >= 2) return "@@GRID:" + remaining.join("||") + "@@";
+            if (remaining.length === 1) return "\n@@IMG:" + remaining[0] + "@@\n";
+            return "";
+          }
+        );
+        draft.content = ta.value;
+      }
+      renderPreviews();
+    });
+  });
 }
 
 // ── CONTENT RENDERER ─────────────────────────────
 function renderContent(text) {
-  return (text||"").split(/(@@IMG:[^@]+@@)/g).map(p => {
-    const m = p.match(/^@@IMG:(.+)@@$/);
-    return m ? `<img src="${esc(m[1])}" class="post-img" loading="lazy" alt="ảnh"/>`
-             : `<span>${esc(p)}</span>`;
+  return (text||"").split(/(@@(?:IMG|GRID):[^@]+@@)/g).map(function(p) {
+    var mImg = p.match(/^@@IMG:(.+)@@$/);
+    if (mImg) return '<img src="' + esc(mImg[1]) + '" class="post-img" loading="lazy" alt="ảnh"/>';
+
+    var mGrid = p.match(/^@@GRID:(.+)@@$/);
+    if (mGrid) {
+      var urls  = mGrid[1].split("||").filter(Boolean).slice(0,4);
+      var n     = urls.length;
+      var items = urls.map(function(u){ return '<div class="gi"><img src="' + esc(u) + '" loading="lazy" alt="ảnh"/></div>'; }).join("");
+      return '<div class="img-grid img-grid-' + n + '">' + items + '</div>';
+    }
+
+    return '<span>' + esc(p) + '</span>';
   }).join("");
 }
 
@@ -415,10 +485,10 @@ function showErr(msg) {
 // ── DRAFT ────────────────────────────────────────
 function scheduleSave() {
   clearTimeout(autoTimer);
-  autoTimer = setTimeout(() => {
+  autoTimer = setTimeout(function() {
     localStorage.setItem("blog_draft", JSON.stringify(draft));
     const s = document.getElementById("save-status");
-    if (s) s.innerHTML = `<span style="color:var(--acc)">✓ Đã lưu nháp</span>`;
+    if (s) s.innerHTML = '<span style="color:var(--acc)">✓ Đã lưu nháp</span>';
   }, 800);
 }
 
@@ -457,6 +527,7 @@ const ICO = {
   trash:  `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
   write:  `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
   img:    `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`,
+  grid:   `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>`,
   back:   `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>`,
   search: `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`,
   chevr:  `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`
@@ -475,12 +546,10 @@ function searchBar(id) { return `
 function shell(inner) {
   if (view === "login") return tLogin();
   const isWrite = view==="write"||view==="edit";
-
   const thIcon  = isDark() ? ICO.sun  : ICO.moon;
   const thLabel = isDark() ? "Sáng"   : "Tối";
 
   return `
-<!-- ── MOBILE HEADER ── -->
 <header class="hdr mob">
   <div class="hdr-row">
     <button id="go-home" class="site-name">
@@ -497,15 +566,11 @@ function shell(inner) {
   ${!isWrite ? `<div class="mob-search">${searchBar("search-m")}</div>` : ""}
 </header>
 
-<!-- ── PAGE ── -->
 <div class="page">
   <div class="${isWrite ? "" : "page-grid"}">
-
-    <!-- ── SIDEBAR ── -->
     ${!isWrite ? `
     <aside class="sidebar desk">
       <div class="sidebar-sticky">
-
         <div class="avatar-wrap">
           <div class="avatar">
             ${PROFILE.avatar
@@ -515,9 +580,7 @@ function shell(inner) {
           <p class="profile-name">${esc(PROFILE.name)}</p>
           <p class="profile-bio">${esc(PROFILE.tagline)}</p>
         </div>
-
         <hr class="sidebar-divider"/>
-
         <div class="stat-row">
           <div class="stat-box">
             <div class="stat-n">${posts.length}</div>
@@ -528,9 +591,7 @@ function shell(inner) {
             <div class="stat-l">Chủ đề</div>
           </div>
         </div>
-
         ${searchBar("search-d")}
-
         ${(()=>{
           const all = [...new Set(posts.flatMap(p=>tagList(p.tags)))];
           return all.length ? `
@@ -541,7 +602,6 @@ function shell(inner) {
               </div>
             </div>` : "";
         })()}
-
         ${PROFILE.links.length ? `
           <div>
             <div class="sb-label">Liên kết</div>
@@ -552,9 +612,7 @@ function shell(inner) {
                 </a>`).join("")}
             </div>
           </div>` : ""}
-
         <hr class="sidebar-divider"/>
-
         <div class="sb-actions">
           <button id="theme-toggle-d" class="btn btn-g" style="justify-content:center;gap:6px">
             ${thIcon} Chế độ ${thLabel}
@@ -571,10 +629,7 @@ function shell(inner) {
         </div>
       </div>
     </aside>` : ""}
-
-    <!-- ── MAIN ── -->
     <div class="${isWrite ? "write-col" : "main-col"}">${inner}</div>
-
   </div>
 </div>
 
@@ -630,7 +685,7 @@ function tHome() {
             <div class="pc-body">
               <div class="pc-date">${esc(fmt(p.createdAt))}</div>
               <h2 class="pc-title">${esc(p.title)}</h2>
-              <p class="pc-excerpt">${esc((p.content||"").replace(/@@IMG:[^@]+@@/g,"").slice(0,180))}</p>
+              <p class="pc-excerpt">${esc((p.content||"").replace(/@@(?:IMG|GRID):[^@]+@@/g,"").slice(0,180))}</p>
               ${tagList(p.tags).length ? `
                 <div class="pc-tags">
                   ${tagList(p.tags).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}
@@ -676,15 +731,19 @@ function tWrite() {
       placeholder="Tiêu đề bài viết…">${esc(draft.title)}</textarea>
 
     <input id="inp-tags" class="wr-tags" type="text"
-      placeholder="Thẻ tag (phẩy ngăn cách): y học, tim mạch…"
+      placeholder="Thẻ tag (phẩy ngăn cách): du lịch, tình nguyện…"
       value="${esc(draft.tags)}"/>
 
     <div class="img-toolbar">
       <div class="img-tb-hdr">
         <span class="img-tb-lbl">Chèn ảnh</span>
         <label class="img-file-label btn btn-g btn-sm">
-          ${ICO.img} Chọn ảnh
+          ${ICO.img} Ảnh đơn
           <input id="img-file-input" type="file" accept="image/*" multiple style="display:none"/>
+        </label>
+        <label class="img-file-label btn btn-g btn-sm">
+          ${ICO.grid} Lưới ảnh <small style="opacity:.6">(2–4)</small>
+          <input id="img-grid-input" type="file" accept="image/*" multiple style="display:none"/>
         </label>
         <span id="upload-status" style="font-size:.75rem;color:var(--fg3)"></span>
       </div>
@@ -765,25 +824,20 @@ function bind() {
   on("go-write",   "click", openWrite);
   on("go-write-m", "click", openWrite);
 
-  // Search
   ["search-d","search-m"].forEach(id => {
     document.getElementById(id)?.addEventListener("input", e => {
       searchQuery = e.target.value;
-      const list  = filtered();
-      // Re-render chỉ vùng post list thay vì toàn trang
       const main  = document.querySelector(".main-col");
       if (main) { main.innerHTML = tHome(); bindList(); }
       setTimeout(() => document.getElementById(id)?.focus(), 5);
     });
   });
 
-  // Tag filter
   document.querySelectorAll(".tag-btn").forEach(el =>
     el.addEventListener("click", () => { searchQuery = el.dataset.tag; render(); }));
 
   bindList();
 
-  // Write
   on("cancel-write","click", () => { setView("home"); editId=null; });
   on("publish-btn", "click", async () => {
     const t = document.getElementById("inp-title")?.value.trim();
@@ -800,6 +854,9 @@ function bind() {
   on("img-file-input","change", async e => {
     if (e.target.files?.length) await handleImages(Array.from(e.target.files));
   });
+  on("img-grid-input","change", async e => {
+    if (e.target.files?.length) await handleGridImages(e.target.files);
+  });
 
   document.querySelectorAll(".rm-img").forEach(el => el.addEventListener("click", ev => {
     ev.stopPropagation();
@@ -807,7 +864,16 @@ function bind() {
     const url = draft.images[i];
     draft.images.splice(i,1);
     const ta = document.getElementById("inp-content");
-    if (ta) { ta.value = ta.value.replace(`\n@@IMG:${url}@@\n`,""); draft.content=ta.value; }
+    if (ta) {
+      ta.value = ta.value.replace("\n@@IMG:"+url+"@@\n","");
+      ta.value = ta.value.replace(new RegExp("@@GRID:([^@]*)@@","g"), function(m) {
+        const rem = m.replace("@@GRID:","").replace("@@","").split("||").filter(u=>u!==url);
+        if (rem.length>=2) return "@@GRID:"+rem.join("||")+"@@";
+        if (rem.length===1) return "\n@@IMG:"+rem[0]+"@@\n";
+        return "";
+      });
+      draft.content = ta.value;
+    }
     renderPreviews();
   }));
 
