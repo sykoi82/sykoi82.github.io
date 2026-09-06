@@ -280,6 +280,12 @@ let editId      = null;
 let draft       = { title:"", content:"", tags:"", images:[] };
 let autoTimer   = null;
 let searchQuery = "";
+if (!history.state) history.replaceState({ view, id: activeId }, "", "");
+window.addEventListener("popstate", e => {
+  const s = e.state || { view: "home", id: null };
+  view = s.view; activeId = s.id;
+  window.scrollTo(0,0); render();
+});
 
 // ── DARK MODE ────────────────────────────────────
 const isDark  = () => document.documentElement.classList.contains("dark");
@@ -493,11 +499,13 @@ function scheduleSave() {
 }
 
 // ── ROUTING ──────────────────────────────────────
-function setView(v, id) {
+function setView(v, id, replace) {
   view = v; if (id !== undefined) activeId = id;
+  const state = { view, id: activeId };
+  if (replace) history.replaceState(state, "", "");
+  else history.pushState(state, "", "");
   window.scrollTo(0,0); render();
 }
-
 // ── HELPERS ──────────────────────────────────────
 function fmt(ts) {
   if (!ts) return "";
